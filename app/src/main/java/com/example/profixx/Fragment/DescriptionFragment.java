@@ -13,11 +13,7 @@ import android.widget.TextView;
 
 import com.example.profixx.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link DescriptionFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class DescriptionFragment extends Fragment {
 
     @Override

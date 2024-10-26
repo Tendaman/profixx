@@ -11,11 +11,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.profixx.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SoldFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class SoldFragment extends Fragment {
 
 
