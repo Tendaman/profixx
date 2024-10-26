@@ -56,9 +56,12 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, DetailActivity.class);
-                intent.putExtra("object",items.get(position));
-                context.startActivity(intent);
+                int currentPosition = holder.getAdapterPosition();
+                if (currentPosition != RecyclerView.NO_POSITION) { // Check that the position is valid
+                    Intent intent = new Intent(context, DetailActivity.class);
+                    intent.putExtra("object", items.get(currentPosition));
+                    context.startActivity(intent);
+                }
             }
         });
 

@@ -23,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SignupActivity extends BaseActivity {
-    TextInputEditText email, password;
+    TextInputEditText email, password, username, phone;
     Button register;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
@@ -48,6 +48,8 @@ public class SignupActivity extends BaseActivity {
         mAuth = FirebaseAuth.getInstance();
         email = findViewById(R.id.emailtxt);
         password = findViewById(R.id.password_txt);
+        username = findViewById(R.id.username_txt);
+        phone = findViewById(R.id.phone_num);
         register = findViewById(R.id.btnSignUp);
         progressBar = findViewById(R.id.progressBar);
         signin = findViewById(R.id.txtLogin);
@@ -56,9 +58,19 @@ public class SignupActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 progressBar.setVisibility(View.VISIBLE);
+                String usernametxt = String.valueOf(username.getText());
+                String phonetxt = String.valueOf(phone.getText());
                 String emailtxt = String.valueOf(email.getText());
                 String passwordtxt = String.valueOf(password.getText());
 
+                if (TextUtils.isEmpty(usernametxt)) {
+                    Toast.makeText(SignupActivity.this, "Enter Username", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (TextUtils.isEmpty(phonetxt)) {
+                    Toast.makeText(SignupActivity.this, "Enter Phone Number", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (TextUtils.isEmpty(emailtxt)) {
                     Toast.makeText(SignupActivity.this, "Enter Email", Toast.LENGTH_SHORT).show();
                     return;
@@ -67,7 +79,7 @@ public class SignupActivity extends BaseActivity {
                     Toast.makeText(SignupActivity.this, "Enter Password", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (TextUtils.isEmpty(emailtxt) && TextUtils.isEmpty(passwordtxt)) {
+                if (TextUtils.isEmpty(usernametxt) && TextUtils.isEmpty(emailtxt) && TextUtils.isEmpty(phonetxt) && TextUtils.isEmpty(passwordtxt)) {
                     Toast.makeText(SignupActivity.this, "Fill in your details", Toast.LENGTH_SHORT).show();
                     return;
                 }

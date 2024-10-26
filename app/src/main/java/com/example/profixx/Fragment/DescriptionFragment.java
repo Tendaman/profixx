@@ -34,6 +34,7 @@ public class DescriptionFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         TextView descTxt = view.findViewById(R.id.descriptionTxt);
+        assert getArguments() != null;
         descTxt.setText(getArguments().getString("description", "No Description"));
     }
 }

@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -19,10 +22,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class ProfileActivity extends BaseActivity {
 
-    Button logoutBtn;
+    ConstraintLayout logoutBtn;
     FirebaseAuth mAuth;
     FirebaseUser user;
     TextView textView;
+    ImageView backBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +34,7 @@ public class ProfileActivity extends BaseActivity {
         setContentView(R.layout.activity_profile);
         logoutBtn = findViewById(R.id.btnSign_out);
         mAuth = FirebaseAuth.getInstance();
-        textView = findViewById(R.id.username);
+        textView = findViewById(R.id.email);
         user = mAuth.getCurrentUser();
 
         if (user == null) {
@@ -50,5 +54,12 @@ public class ProfileActivity extends BaseActivity {
                 finish();
             }
         });
+
+        setVariable();
+    }
+
+    private void setVariable() {
+        backBtn = findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(v -> finish());
     }
 }

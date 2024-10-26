@@ -32,12 +32,17 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull SizeAdapter.ViewHolder holder, int position) {
         holder.binding.sizeTxt.setText(items.get(position));
+
         holder.binding.getRoot().setOnClickListener(v -> {
-            lastSelectedPosition = selectedPosition;
-            selectedPosition = position;
-            notifyItemChanged(lastSelectedPosition);
-            notifyItemChanged(selectedPosition);
+            int currentPosition = holder.getAdapterPosition();
+            if (currentPosition != RecyclerView.NO_POSITION) {
+                lastSelectedPosition = selectedPosition;
+                selectedPosition = currentPosition;
+                notifyItemChanged(lastSelectedPosition);
+                notifyItemChanged(selectedPosition);
+            }
         });
+
         if (selectedPosition == holder.getAdapterPosition()) {
             holder.binding.sizeLayout.setBackgroundResource(R.drawable.size_selected);
             holder.binding.sizeTxt.setTextColor(context.getResources().getColor(R.color.green));
@@ -46,6 +51,7 @@ public class SizeAdapter extends RecyclerView.Adapter<SizeAdapter.ViewHolder> {
             holder.binding.sizeTxt.setTextColor(context.getResources().getColor(R.color.black));
         }
     }
+
 
     @Override
     public int getItemCount() {
