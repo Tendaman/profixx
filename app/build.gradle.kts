@@ -47,6 +47,7 @@ dependencies {
     implementation("com.stripe:stripe-android:18.0.0")
     implementation("com.android.volley:volley:1.2.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation(libs.glide)
     implementation(libs.gson)
     implementation(libs.firebase.auth)
