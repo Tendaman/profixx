@@ -16,11 +16,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".Activity.InvoiceActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activity.ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".Activity.MainActivity"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".Users.SignupActivity"
             android:exported="false" />
