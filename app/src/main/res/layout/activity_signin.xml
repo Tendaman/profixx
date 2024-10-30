@@ -180,6 +180,19 @@
                     app:iconPadding="16dp"
                     app:iconSize="38dp"
                     app:iconTint="@null" />
+
+                <Button
+                    android:id="@+id/btnSellerLogin"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Continue as Seller"
+                    android:textColor="@color/black"
+                    app:backgroundTint="@color/white"
+                    app:iconGravity="start"
+                    app:iconPadding="16dp" />
+
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
