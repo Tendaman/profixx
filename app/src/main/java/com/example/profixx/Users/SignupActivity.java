@@ -84,6 +84,7 @@ public class SignupActivity extends BaseActivity {
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestProfile()
                 .build();
 
         gsc = GoogleSignIn.getClient(this, gso);
@@ -165,9 +166,12 @@ public class SignupActivity extends BaseActivity {
     }
 
     private void updateUI(GoogleSignInAccount account) {
-        Intent intent = new Intent(SignupActivity.this, MainActivity.class);
-        startActivity(intent);
-        finish();
+        progressBar.setVisibility(View.GONE);
+        if (account != null) {
+            Intent intent = new Intent(SignupActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     private void signIn() {
@@ -187,17 +191,58 @@ public class SignupActivity extends BaseActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
+
             if (account != null) {
-                FirebaseUser currentUser = mAuth.getCurrentUser();
-                if (currentUser != null) {
-                    saveUserDataToDatabase(currentUser.getUid(), account.getDisplayName(), account.getEmail(), account.getEmail());
-                }
+                // Get user details from Google Account
+                String email = account.getEmail();
+                String username = account.getDisplayName();
+                String userId = account.getId();
+                String photoUrl = String.valueOf(account.getPhotoUrl());
+
+
+                // Save user data to Firebase
+                saveGoogleUserDataToDatabase(userId, username, email, photoUrl);
+
+                Toast.makeText(this, "Signed in successfully", Toast.LENGTH_SHORT).show();
                 updateUI(account);
             }
         } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             updateUI(null);
         }
+    }
+
+    private void saveGoogleUserDataToDatabase(String userId, String username, String email, String photoUrl) {
+        DatabaseReference userRef = usersRef.child(userId);
+
+        // Check if user already exists
+        userRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+
+                    HashMap<String, Object> userData = new HashMap<>();
+                    userData.put("username", username);
+                    userData.put("email", email);
+                    userData.put("phone", "");
+                    userData.put("photoUrl", photoUrl);
+
+                    userRef.setValue(userData).addOnCompleteListener(saveTask -> {
+                        if (saveTask.isSuccessful()) {
+                            Log.d("SignupActivity", "Google user data saved to database");
+                        } else {
+                            Log.e("SignupActivity", "Failed to save Google user data", saveTask.getException());
+                            Toast.makeText(SignupActivity.this,
+                                    "Failed to save user data", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+            } else {
+                Log.e("SignupActivity", "Error checking user existence", task.getException());
+                Toast.makeText(SignupActivity.this,
+                        "Error checking user data", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
 }

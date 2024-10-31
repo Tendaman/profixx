@@ -68,6 +68,7 @@ public class SigninActivity extends BaseActivity {
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestProfile()
                 .build();
 
         gsc = GoogleSignIn.getClient(this, gso);
