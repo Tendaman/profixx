@@ -20,6 +20,9 @@
             android:exported="false" />
         <activity
             android:name=".Users.RegisterActivity"
+
+            android:name=".Activity.InvoiceActivity"
+ 
             android:exported="false" />
         <activity
             android:name=".Activity.ProfileActivity"

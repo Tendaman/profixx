@@ -1,5 +1,6 @@
 package com.example.profixx.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -125,6 +126,9 @@ public class CheckoutActivity extends BaseActivity {
                             public void onCaptureComplete(@NonNull CaptureOrderResult result) {
                                 Log.d(TAG, String.format("CaptureOrderResult: %s", result));
                                 Toast.makeText(CheckoutActivity.this, "Successful", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(CheckoutActivity.this, InvoiceActivity.class);
+                                startActivity(intent);
+                                finish();
                             }
                         });
                     }
@@ -279,6 +283,9 @@ public class CheckoutActivity extends BaseActivity {
     private void onPaymentResult(PaymentSheetResult paymentSheetResult) {
         if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
             Toast.makeText(this, "Payment Successful", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(CheckoutActivity.this, InvoiceActivity.class);
+            startActivity(intent);
+            finish();
         } else {
             Toast.makeText(this, "Payment Failed", Toast.LENGTH_SHORT).show();
         }
