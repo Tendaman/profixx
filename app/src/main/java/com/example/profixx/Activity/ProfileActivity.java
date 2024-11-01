@@ -39,7 +39,7 @@ public class ProfileActivity extends BaseActivity {
     ImageView backBtn, profilePic;
     GoogleSignInClient gsc;
     GoogleSignInOptions gso;
-    TextInputEditText address, suburb, city, country, postalCode, phoneNumber;
+    TextInputEditText address, suburb, city, province, country, postalCode, phoneNumber;
     ImageView editBtn;
     Button saveBtn;
     DatabaseReference myRef;
@@ -108,23 +108,25 @@ public class ProfileActivity extends BaseActivity {
                     String suburbText = snapshot.child("suburb").getValue(String.class);
                     String cityText = snapshot.child("city").getValue(String.class);
                     String countryText = snapshot.child("country").getValue(String.class);
+                    String provinceText = snapshot.child("province").getValue(String.class);
                     String postalCodeText = snapshot.child("postalCode").getValue(String.class);
+                    String phoneText = snapshot.child("phone").getValue(String.class);
 
                     // Set shipping details
                     address.setText(addressText != null ? addressText : "");
                     suburb.setText(suburbText != null ? suburbText : "");
                     city.setText(cityText != null ? cityText : "");
                     country.setText(countryText != null ? countryText : "");
+                    province.setText(countryText != null ? provinceText : "");
                     postalCode.setText(postalCodeText != null ? postalCodeText : "");
+                    phoneNumber.setText(phoneText != null ? phoneText : "No phone number");
 
                     // If it's a regular user, also load their basic info
                     if (acct == null) {
                         String usernameText = snapshot.child("username").getValue(String.class);
-                        String phoneText = snapshot.child("phone").getValue(String.class);
                         String emailText = snapshot.child("email").getValue(String.class);
 
                         username.setText(usernameText != null ? usernameText : "No username");
-                        phoneNumber.setText(phoneText != null ? phoneText : "No phone number");
                         email.setText(emailText != null ? emailText : "No email");
                         profilePic.setImageResource(R.drawable.baseline_perm_identity_24);
                     }
@@ -144,7 +146,9 @@ public class ProfileActivity extends BaseActivity {
 
         // Set the save button as hidden and fields as disabled by default
         saveBtn.setVisibility(View.GONE);
+        phoneSave.setVisibility(View.GONE);
         setShippingFieldsEnabled(false);
+        phoneNumber.setEnabled(false);
 
         editBtn.setOnClickListener(v -> {
             setShippingFieldsEnabled(true);
@@ -152,6 +156,41 @@ public class ProfileActivity extends BaseActivity {
         });
 
         saveBtn.setOnClickListener(v -> saveShippingDetails(userId));
+
+        // Setup phone number editing
+        phoneEdit.setOnClickListener(v -> {
+            phoneNumber.setEnabled(true);
+            phoneEdit.setVisibility(View.GONE);
+            phoneSave.setVisibility(View.VISIBLE);
+            phoneNumber.requestFocus();
+        });
+
+        phoneSave.setOnClickListener(v -> savePhoneNumber(userId));
+    }
+
+    private void savePhoneNumber(String userId) {
+        String newPhoneNumber = phoneNumber.getText().toString().trim();
+
+        // Basic validation
+        if (newPhoneNumber.isEmpty()) {
+            phoneNumber.setError("Phone number cannot be empty");
+            return;
+        }
+
+        // Disable editing and hide save button
+        phoneNumber.setEnabled(false);
+        phoneSave.setVisibility(View.GONE);
+        phoneEdit.setVisibility(View.VISIBLE);
+
+        // Save to Firebase
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put("phone", newPhoneNumber);
+
+        myRef.child(userId).updateChildren(updates)
+                .addOnSuccessListener(aVoid -> Toast.makeText(ProfileActivity.this,
+                        "Phone number updated successfully", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(ProfileActivity.this,
+                        "Failed to update phone number", Toast.LENGTH_SHORT).show());
     }
 
     private void saveShippingDetails(String userId) {
@@ -163,6 +202,7 @@ public class ProfileActivity extends BaseActivity {
         shippingDetails.put("suburb", suburb.getText().toString().trim());
         shippingDetails.put("city", city.getText().toString().trim());
         shippingDetails.put("country", country.getText().toString().trim());
+        shippingDetails.put("province", province.getText().toString().trim());
         shippingDetails.put("postalCode", postalCode.getText().toString().trim());
 
         myRef.child(userId).updateChildren(shippingDetails)
@@ -190,6 +230,7 @@ public class ProfileActivity extends BaseActivity {
         suburb = findViewById(R.id.suburb);
         city = findViewById(R.id.city);
         country = findViewById(R.id.country);
+        province = findViewById(R.id.province);
         postalCode = findViewById(R.id.postalCode);
         editBtn = findViewById(R.id.editBtn);
         saveBtn = findViewById(R.id.saveBtn);
@@ -202,6 +243,7 @@ public class ProfileActivity extends BaseActivity {
         suburb.setEnabled(enabled);
         city.setEnabled(enabled);
         country.setEnabled(enabled);
+        province.setEnabled(enabled);
         postalCode.setEnabled(enabled);
     }
 

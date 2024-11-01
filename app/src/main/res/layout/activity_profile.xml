@@ -169,6 +169,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginEnd="16dp"
+                        android:layout_marginStart="16dp"
                         android:visibility="gone"
                         app:srcCompat="@drawable/baseline_save_alt_24"
                         android:contentDescription="EditPhone" />
@@ -178,6 +179,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginBottom="16dp"
+                    android:layout_marginTop="16dp"
                     android:background="@color/grey"
                     android:orientation="vertical">
 
@@ -289,6 +291,22 @@
                         android:inputType="text"
                         android:enabled="false"
                         android:hint="Country" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/input_background">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/province"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:inputType="text"
+                        android:enabled="false"
+                        android:hint="Province" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout

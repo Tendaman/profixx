@@ -3,6 +3,7 @@ package com.example.profixx.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -27,8 +28,19 @@ import com.example.profixx.Fragment.SoldFragment;
 import com.example.profixx.Helper.ManagmentCart;
 import com.example.profixx.R;
 import com.example.profixx.databinding.ActivityDetailBinding;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class DetailActivity extends BaseActivity {
@@ -37,6 +49,9 @@ public class DetailActivity extends BaseActivity {
     private final int numberOrder = 1;
     private ManagmentCart managmentCart;
     private Handler slideHandle = new Handler();
+    private FirebaseAuth mAuth;
+    private DatabaseReference wishlistRef;
+    private boolean isInWishlist = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,13 +59,133 @@ public class DetailActivity extends BaseActivity {
         binding = ActivityDetailBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Initialize Firebase
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        wishlistRef = database.getReference("users");
+
         managmentCart = new ManagmentCart(this);
 
         getBundle();
         initbanners();
         initSize();
         setupViewPager();
+        setupFavoriteButton();
+        checkIfInWishlist();
 
+    }
+
+    private void setupFavoriteButton() {
+        binding.favBtn.setOnClickListener(v -> {
+            String userId = getCurrentUserId();
+            if (userId != null) {
+                if (isInWishlist) {
+                    removeFromWishlist(userId);
+                } else {
+                    addToWishlist(userId);
+                }
+            } else {
+                Toast.makeText(DetailActivity.this, "Please sign in to add items to wishlist", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String getCurrentUserId() {
+        // Check for Google Sign In first
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct != null) {
+            return acct.getId();
+        }
+
+        // Check for Firebase user
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            return user.getUid();
+        }
+
+        return null;
+    }
+
+    private void checkIfInWishlist() {
+        String userId = getCurrentUserId();
+        if (userId != null) {
+            wishlistRef.child(userId)
+                    .child("wishlist")
+                    .orderByChild("title")
+                    .equalTo(object.getTitle())
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            isInWishlist = snapshot.exists();
+                            updateFavoriteIcon();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(DetailActivity.this, "Error checking wishlist", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private void updateFavoriteIcon() {
+        // Assuming you have two different drawable resources for favorite states
+        binding.favBtn.setImageResource(isInWishlist ?
+                R.drawable.fav_filled : R.drawable.fav);
+    }
+
+    private void addToWishlist(String userId) {
+        // Create wishlist item
+        HashMap<String, Object> wishlistItem = new HashMap<>();
+        wishlistItem.put("picUrl", object.getPicUrl());
+        wishlistItem.put("title", object.getTitle());
+        wishlistItem.put("price", object.getPrice());
+        wishlistItem.put("rating", object.getRating());
+        wishlistItem.put("timestamp", ServerValue.TIMESTAMP);
+
+        // Generate a unique key for the wishlist item
+        String wishlistItemId = wishlistRef.child(userId).child("wishlist").push().getKey();
+
+        wishlistRef.child(userId)
+                .child("wishlist")
+                .child(wishlistItemId)
+                .setValue(wishlistItem)
+                .addOnSuccessListener(aVoid -> {
+                    isInWishlist = true;
+                    updateFavoriteIcon();
+                    Toast.makeText(DetailActivity.this, "Added to wishlist", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(DetailActivity.this, "Failed to add to wishlist", Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private void removeFromWishlist(String userId) {
+        wishlistRef.child(userId)
+                .child("wishlist")
+                .orderByChild("title")
+                .equalTo(object.getTitle())
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                            itemSnapshot.getRef().removeValue()
+                                    .addOnSuccessListener(aVoid -> {
+                                        isInWishlist = false;
+                                        updateFavoriteIcon();
+                                        Toast.makeText(DetailActivity.this, "Removed from wishlist", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e ->
+                                            Toast.makeText(DetailActivity.this, "Failed to remove from wishlist", Toast.LENGTH_SHORT).show()
+                                    );
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(DetailActivity.this, "Error removing from wishlist", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void initSize() {

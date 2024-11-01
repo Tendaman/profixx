@@ -43,6 +43,7 @@ public class MainActivity extends BaseActivity {
     private void bottomNavigation() {
         binding.cartBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this,CartActivity.class)));
         binding.profileBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this,ProfileActivity.class)));
+        binding.wishlistBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this,WishlistActivity.class)));
     }
 
     private void initPopular() {
