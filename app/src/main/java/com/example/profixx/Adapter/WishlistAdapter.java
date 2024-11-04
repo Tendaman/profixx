@@ -2,7 +2,6 @@
 package com.example.profixx.Adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +10,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.profixx.Activity.DetailActivity;
 import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.Domain.WishlistDomain;
 import com.example.profixx.R;
@@ -67,7 +64,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         holder.deleteItem.setOnClickListener(v -> removeItem(adapterPosition));
 
         // Set up click listener for the entire item
-        holder.itemLayout.setOnClickListener(v -> {
+        holder.constraintLayout4.setOnClickListener(v -> {
             // Convert WishlistDomain to ItemsDomain for DetailActivity
             ItemsDomain itemsDomain = new ItemsDomain();
             itemsDomain.setTitle(item.getTitle());
@@ -157,7 +154,6 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             ratingTxt = itemView.findViewById(R.id.ratingTxt);
             pic = itemView.findViewById(R.id.imageView15);
             deleteItem = itemView.findViewById(R.id.deleteItem);
-            itemLayout = itemView.findViewById(R.id.constraintLayout4);
         }
     }
 }
