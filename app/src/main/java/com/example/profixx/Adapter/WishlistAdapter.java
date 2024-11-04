@@ -2,6 +2,7 @@
 package com.example.profixx.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.profixx.Activity.DetailActivity;
+import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.Domain.WishlistDomain;
 import com.example.profixx.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -61,6 +65,22 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         // Set up delete button click listener
         final int adapterPosition = position;
         holder.deleteItem.setOnClickListener(v -> removeItem(adapterPosition));
+
+        // Set up click listener for the entire item
+        holder.itemLayout.setOnClickListener(v -> {
+            // Convert WishlistDomain to ItemsDomain for DetailActivity
+            ItemsDomain itemsDomain = new ItemsDomain();
+            itemsDomain.setTitle(item.getTitle());
+            itemsDomain.setPrice(item.getPrice());
+            itemsDomain.setRating(item.getRating());
+            itemsDomain.setPicUrl(item.getPicUrl());
+            // Set any other necessary fields that DetailActivity expects
+
+            // Create intent and pass data
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra("object", itemsDomain);
+            context.startActivity(intent);
+        });
     }
 
     private String getCurrentUserId() {
@@ -128,6 +148,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView titleTxt, priceTxt, ratingTxt, deleteItem;
         ImageView pic;
+        ConstraintLayout itemLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -136,6 +157,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             ratingTxt = itemView.findViewById(R.id.ratingTxt);
             pic = itemView.findViewById(R.id.imageView15);
             deleteItem = itemView.findViewById(R.id.deleteItem);
+            itemLayout = itemView.findViewById(R.id.constraintLayout4);
         }
     }
 }

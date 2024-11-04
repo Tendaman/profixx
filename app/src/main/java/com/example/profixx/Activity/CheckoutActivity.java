@@ -88,6 +88,14 @@ public class CheckoutActivity extends BaseActivity {
         setVariable();
         initPayPal();
         initCardPay();
+        initChangeAddress();
+    }
+
+    private void initChangeAddress() {
+        binding.changeAddress.setOnClickListener(v -> {
+            Intent intent = new Intent(CheckoutActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void initPayPal() {
