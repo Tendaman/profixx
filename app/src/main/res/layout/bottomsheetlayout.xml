@@ -92,16 +92,15 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/baseline_tv_24"/>
+            android:src="@drawable/ic_bar_chart_24"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Promote Store"
+            android:text="Analytics"
             android:textColor="@color/black"
             android:layout_marginStart="30dp"
             android:textSize="16sp"/>
-
     </LinearLayout>
     <LinearLayout
         android:id="@+id/nonthing"

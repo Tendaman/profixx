@@ -1,4 +1,4 @@
-package com.example.profixx.Activity;
+package com.example.profixx.BussinessActivity;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -11,19 +11,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
+import com.example.profixx.Activity.BaseActivity;
 import com.example.profixx.R;
 import com.example.profixx.Users.BusinessLoginActivity;
-import com.example.profixx.Users.SigninActivity;
 import com.example.profixx.databinding.ActivityDashboardBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -107,7 +101,7 @@ public class DashboardActivity extends BaseActivity {
 
             // Set up click listeners for each option
             createProduct.setOnClickListener(v1 -> {
-                Toast.makeText(DashboardActivity.this, "Create Product Selected", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getApplicationContext(), CreateProductActivity.class));
                 dialog.dismiss();
             });
 

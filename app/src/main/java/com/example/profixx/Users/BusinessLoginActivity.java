@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.profixx.Activity.BaseActivity;
-import com.example.profixx.Activity.DashboardActivity;
+import com.example.profixx.BussinessActivity.DashboardActivity;
 import com.example.profixx.databinding.ActivityBusinessLoginBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

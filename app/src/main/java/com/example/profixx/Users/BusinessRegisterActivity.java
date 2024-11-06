@@ -7,14 +7,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.profixx.Activity.BaseActivity;
-import com.example.profixx.Activity.DashboardActivity;
+import com.example.profixx.BussinessActivity.DashboardActivity;
 import com.example.profixx.databinding.ActivityBusinessRegisterBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
