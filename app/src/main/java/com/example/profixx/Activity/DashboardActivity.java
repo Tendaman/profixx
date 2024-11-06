@@ -23,9 +23,13 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.profixx.R;
 import com.example.profixx.Users.BusinessLoginActivity;
+import com.example.profixx.Users.SigninActivity;
 import com.example.profixx.databinding.ActivityDashboardBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.squareup.picasso.Picasso;
 
 import java.util.Objects;
 
@@ -34,6 +38,8 @@ public class DashboardActivity extends BaseActivity {
     ActivityDashboardBinding binding;
     FirebaseAuth mAuth;
     FirebaseUser user;
+    FirebaseDatabase database;
+    DatabaseReference myRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +47,49 @@ public class DashboardActivity extends BaseActivity {
         binding = ActivityDashboardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initVariables();
+        initLoadData();
         initFab();
         initSignout();
+    }
+
+    private void initLoadData() {
+        user = mAuth.getCurrentUser();
+        if (user == null) {
+            redirectToSignIn();
+        } else {
+            loadUserData(user.getUid(), null);
+        }
+    }
+
+    private void loadUserData(String uid, Object o) {
+        myRef.child("businesses").child(uid).get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult().exists()) {
+                    // Get the business data
+                    String businessName = task.getResult().child("businessName").getValue(String.class);
+                    String businessLogo = task.getResult().child("logo").getValue(String.class);
+
+                    // Set data to the TextView and ImageView
+                    binding.busName.setText(businessName);
+
+                    // Load the logo using Picasso (assuming it's a URL)
+                    if (businessLogo != null) {
+                        Picasso.get().load(businessLogo).into(binding.logo);
+                    } else {
+                        // Default logo in case there's no logo URL
+                        Picasso.get().load(R.drawable.btn_4).into(binding.logo);
+                    }
+                }
+            } else {
+                Toast.makeText(DashboardActivity.this, "Failed to load business data", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void redirectToSignIn() {
+        Intent intent = new Intent(getApplicationContext(), BusinessLoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void initFab() {
@@ -121,6 +168,8 @@ public class DashboardActivity extends BaseActivity {
     private void initVariables() {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference();
     }
 
     private void initSignout() {
