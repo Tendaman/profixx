@@ -33,7 +33,7 @@ import java.util.HashMap;
 
 public class SignupActivity extends BaseActivity {
     TextInputEditText email, password, conPassword, username, phone;
-    Button register,googleBtn;
+    Button register,googleBtn, businessLogin;
     FirebaseAuth mAuth;
     FirebaseDatabase database;
     DatabaseReference usersRef;
@@ -81,6 +81,7 @@ public class SignupActivity extends BaseActivity {
         progressBar = findViewById(R.id.progressBar);
         signin = findViewById(R.id.txtLogin);
         googleBtn = findViewById(R.id.btnGoogle);
+        businessLogin = findViewById(R.id.btnBusiness);
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -126,6 +127,12 @@ public class SignupActivity extends BaseActivity {
 
         signin.setOnClickListener(v -> {
             Intent intent = new Intent(SignupActivity.this, SigninActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        businessLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(SignupActivity.this, BusinessLoginActivity.class);
             startActivity(intent);
             finish();
         });

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Users.SigninActivity">
+    tools:context=".Users.BusinessLoginActivity">
 
     <ScrollView
         android:layout_width="0dp"
@@ -17,37 +17,45 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/textView7"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="Profixx"
-                    android:textColor="@color/black"
-                    android:textSize="32sp"
-                    android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="@+id/imageView4"
-                    app:layout_constraintStart_toStartOf="@+id/imageView4"
-                    app:layout_constraintTop_toBottomOf="@+id/imageView4" />
-
-                <ImageView
-                    android:id="@+id/imageView4"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_marginStart="16dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/materialCardView"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
+                    app:cardCornerRadius="60dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/profix_big_p" />
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <ImageView
+                        android:id="@+id/businessLogo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        app:srcCompat="@drawable/profix_big_p" />
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <TextView
+                    android:id="@+id/businessName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textColor="@color/black"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:text="No business name"
+                    app:layout_constraintEnd_toEndOf="@id/materialCardView"
+                    app:layout_constraintStart_toStartOf="@id/materialCardView"
+                    app:layout_constraintTop_toBottomOf="@id/materialCardView" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -62,10 +70,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textSize="32sp"
+                    android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/black"
-                    android:text="Login" />
+                    android:text="Business Signin" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
@@ -74,14 +82,14 @@
                     android:background="@drawable/input_background">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/emailtxt"
+                        android:id="@+id/businessEmail"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@android:color/transparent"
                         android:drawableStart="@drawable/ic_mail_24"
                         android:drawablePadding="10dp"
                         android:inputType="textEmailAddress"
-                        android:hint="@string/email" />
+                        android:hint="Business Email" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -92,7 +100,7 @@
                     app:passwordToggleEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/password_txt"
+                        android:id="@+id/passwordBusiness"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@android:color/transparent"
@@ -178,30 +186,15 @@
                 android:layout_marginEnd="32dp">
 
                 <Button
-                    android:id="@+id/btnGoogle"
+                    android:id="@+id/btnUser"
                     style="@style/Widget.Material3.Button.OutlinedButton.Icon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Signin with Google"
+                    android:text="Signin as user"
                     android:textColor="@color/black"
                     app:backgroundTint="@color/white"
-                    app:icon="@drawable/ic_google_contained_fill_24"
-                    app:iconGravity="start"
-                    app:iconPadding="16dp"
-                    app:iconSize="38dp"
-                    app:iconTint="@null" />
-
-                <Button
-                    android:id="@+id/btnBusiness"
-                    style="@style/Widget.Material3.Button.OutlinedButton.Icon"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Business Signin"
-                    android:textColor="@color/black"
-                    app:backgroundTint="@color/white"
-                    app:icon="@drawable/ic_business_24"
+                    app:icon="@drawable/ic_user_24"
                     app:iconGravity="start"
                     app:iconPadding="16dp"
                     app:iconSize="38dp"

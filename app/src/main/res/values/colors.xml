@@ -4,9 +4,14 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#169955</color>
     <color name="red">#FF990000</color>
-    <color name="blue">#FF0000FF</color>
+    <color name="mblue">#FF0000FF</color>
     <color name="yellow">#FFFF9900</color>
     <color name="grey">#FF999999</color>
     <color name="dark_grey">#FF666666</color>
-    <color name="light_grey">#FFCCCCCC</color>"
+    <color name="light_grey">#FFCCCCCC</color>
+    <color name="dark_green">#FF169955</color>
+    <color name="dark_red">#FF990000</color>
+    <color name="dark_blue">#FF0000FF</color>
+    <color name="dark_yellow">#FF999900</color>
+    <color name="orange">#FF996600</color>
 </resources>

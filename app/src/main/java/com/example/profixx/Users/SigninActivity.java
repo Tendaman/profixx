@@ -9,8 +9,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
 import com.example.profixx.Activity.BaseActivity;
 import com.example.profixx.Activity.MainActivity;
 import com.example.profixx.R;
@@ -19,16 +17,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SigninActivity extends BaseActivity {
     TextInputEditText email, password;
-    Button login, googleBtn;
+    Button login, googleBtn, businessLogin;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
     TextView signup;
@@ -50,7 +46,7 @@ public class SigninActivity extends BaseActivity {
             GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
             updateUI(account);
         }else{
-            Toast.makeText(this, "Please Login", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Welcome to Profixx", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -65,6 +61,7 @@ public class SigninActivity extends BaseActivity {
         progressBar = findViewById(R.id.progressBar);
         signup = findViewById(R.id.txtSignup);
         googleBtn = findViewById(R.id.btnGoogle);
+        businessLogin = findViewById(R.id.btnBusiness);
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -102,31 +99,31 @@ public class SigninActivity extends BaseActivity {
                 }
 
                 mAuth.signInWithEmailAndPassword(emailtxt, passwordtxt)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                progressBar.setVisibility(View.GONE);
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(SigninActivity.this, "Authentication successful.", Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                } else {
-                                    Toast.makeText(SigninActivity.this, "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
-                                }
+                        .addOnCompleteListener(task -> {
+                            progressBar.setVisibility(View.GONE);
+                            if (task.isSuccessful()) {
+                                Toast.makeText(SigninActivity.this, "Authentication successful.", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                Toast.makeText(SigninActivity.this, "Authentication failed.",
+                                        Toast.LENGTH_SHORT).show();
                             }
                         });
             }
         });
 
-        signup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(SigninActivity.this, SignupActivity.class);
-                startActivity(intent);
-                finish();
-            }
+        signup.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), SignupActivity.class);
+            startActivity(intent);
+            finish();
+        });
+
+        businessLogin.setOnClickListener(v -> {
+            Intent intent = new Intent(getApplicationContext(), BusinessLoginActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 
