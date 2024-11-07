@@ -31,6 +31,7 @@ public class CreateProductActivity extends BaseActivity {
     ActivityResultLauncher<Intent> imagePickerLauncher;
     Uri imageUri;
     StorageReference storageReference;
+    String imageUrl; // Variable to store the uploaded image URL
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,14 @@ public class CreateProductActivity extends BaseActivity {
         initVariables();
         uploadImage();
         saveBtn();
+        backBtn();
+    }
+
+    private void backBtn() {
+        binding.backBtn.setOnClickListener(view -> {
+            startActivity(new Intent(getApplicationContext(), DashboardActivity.class));
+            finish();
+        });
     }
 
     private void saveBtn() {
@@ -63,31 +72,12 @@ public class CreateProductActivity extends BaseActivity {
                 return;
             }
 
-            // Proceed with data upload
-            uploadData(uid, itemNameTxt, oldPriceTxt, priceTxt, itemDescTxt);
+            // Proceed with saving data to database only after Save button is clicked
+            uploadData(uid, itemNameTxt, oldPriceTxt, priceTxt, itemDescTxt, imageUrl);  // Using the stored image URL
         });
     }
 
-    private void uploadData(String uid, String itemNameTxt, String oldPriceTxt, String priceTxt, String itemDescTxt) {
-        // Generate unique identifier for each product image
-        String uniqueID = UUID.randomUUID().toString();
-        StorageReference imageRef = storageReference.child("product_images/" + uniqueID + ".jpg");
-
-        // Upload image and retrieve the URL to save in database
-        imageRef.putFile(imageUri)
-                .addOnSuccessListener(taskSnapshot -> imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                    String imgUrl = uri.toString();
-                    saveProductDataToDatabase(itemNameTxt, oldPriceTxt, priceTxt, itemDescTxt, imgUrl);
-                }))
-                .addOnFailureListener(e -> {
-                    binding.progressBar2.setVisibility(View.GONE);
-                    binding.btnSign.setVisibility(View.VISIBLE);
-                    binding.textView21.setVisibility(View.VISIBLE);
-                    Toast.makeText(getApplicationContext(), "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void saveProductDataToDatabase(String itemNameTxt, String oldPriceTxt, String priceTxt, String itemDescTxt, String imgUrl) {
+    private void uploadData(String uid, String itemNameTxt, String oldPriceTxt, String priceTxt, String itemDescTxt, String imgUrl) {
         // Create a unique key for each product under the "products" sub-node
         DatabaseReference newProductRef = productsRef.push();
 
@@ -106,12 +96,38 @@ public class CreateProductActivity extends BaseActivity {
 
             if (task.isSuccessful()) {
                 Toast.makeText(this, "Product saved successfully", Toast.LENGTH_SHORT).show();
-                // Optionally clear fields after successful save
-                clearFields();
+                clearFields();  // Optionally clear fields after successful save
             } else {
                 Toast.makeText(this, "Failed to save product", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void uploadImageToStorage(String itemNameTxt, String oldPriceTxt, String priceTxt, String itemDescTxt) {
+        // Generate unique ID for the image
+        String uniqueID = UUID.randomUUID().toString();
+        StorageReference imageRef = storageReference.child("product_images/" + uniqueID + ".jpg");
+
+        // Start uploading the image
+        imageRef.putFile(imageUri)
+                .addOnSuccessListener(taskSnapshot -> {
+                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                        imageUrl = uri.toString(); // Store the image URL here
+
+                        // Display the image in the ImageView once the upload is successful
+                        binding.productImage.setImageURI(imageUri);
+
+                        // Hide the progress bar and show the checkmark when image is loaded
+                        binding.progressBar.setVisibility(View.GONE);
+                        binding.readyView.setVisibility(View.VISIBLE); // Show checkmark
+
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    binding.progressBar.setVisibility(View.GONE); // Hide progress bar on failure
+                    binding.readyView.setVisibility(View.GONE);   // Ensure checkmark is hidden
+                    Toast.makeText(getApplicationContext(), "Failed to upload image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void uploadImage() {
@@ -120,7 +136,18 @@ public class CreateProductActivity extends BaseActivity {
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         imageUri = result.getData().getData();
-                        binding.productImage.setImageURI(imageUri); // Set the selected image
+
+                        // Display a progress bar until the image is uploaded
+                        binding.progressBar.setVisibility(View.VISIBLE);
+                        binding.readyView.setVisibility(View.GONE); // Hide checkmark initially
+
+                        // Upload the image to Firebase storage
+                        String itemNameTxt = String.valueOf(binding.itemName.getText());
+                        String oldPriceTxt = String.valueOf(binding.oldPrice.getText());
+                        String priceTxt = String.valueOf(binding.price.getText());
+                        String itemDescTxt = String.valueOf(binding.productDesc.getText());
+
+                        uploadImageToStorage(itemNameTxt, oldPriceTxt, priceTxt, itemDescTxt);  // Pass the parameters here
                     }
                 }
         );
@@ -143,11 +170,8 @@ public class CreateProductActivity extends BaseActivity {
     }
 
     private void clearFields() {
-        binding.itemName.setText("");
-        binding.oldPrice.setText("");
-        binding.price.setText("");
-        binding.productDesc.setText("");
-        binding.productImage.setImageURI(null);
-        imageUri = null;
+        binding.readyView.setVisibility(View.GONE);  // Hide checkmark after save
+        startActivity(new Intent(getApplicationContext(), DashboardActivity.class));
+        finish();
     }
 }
