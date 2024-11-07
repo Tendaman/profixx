@@ -76,9 +76,9 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/imageView19"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:id="@+id/productImage"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
                     android:background="@drawable/image_background"
                     tools:srcCompat="@tools:sample/avatars" />
 
@@ -126,7 +126,7 @@
                     android:layout_height="35dp"
                     android:layout_weight="1"
                     android:layout_marginStart="16dp"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     app:srcCompat="@drawable/check_24" />
 
 
