@@ -44,6 +44,14 @@ public class DashboardActivity extends BaseActivity {
         initLoadData();
         initFab();
         initSignout();
+        ViewProductActivity();
+    }
+
+    private void ViewProductActivity() {
+        binding.products.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, ViewProductsActivity.class));
+            finish();
+        });
     }
 
     private void initLoadData() {

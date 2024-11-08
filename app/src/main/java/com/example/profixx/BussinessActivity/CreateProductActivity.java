@@ -50,7 +50,7 @@ public class CreateProductActivity extends BaseActivity {
             startActivity(new Intent(getApplicationContext(), DashboardActivity.class));
             finish();
         });
-    }
+        }
 
     private void saveBtn() {
         binding.btnSave.setOnClickListener(view -> {
@@ -59,12 +59,12 @@ public class CreateProductActivity extends BaseActivity {
             binding.textView21.setVisibility(View.GONE);
 
             String itemNameTxt = String.valueOf(binding.itemName.getText());
-            String oldPriceTxt = String.valueOf(binding.oldPrice.getText());
-            String priceTxt = String.valueOf(binding.price.getText());
+            double oldPriceTxt = Double.parseDouble(String.valueOf(binding.oldPrice.getText()));
+            double priceTxt = Double.parseDouble(String.valueOf(binding.price.getText()));
             String itemDescTxt = String.valueOf(binding.productDesc.getText());
 
             // Validate fields before uploading
-            if (itemNameTxt.isEmpty() || priceTxt.isEmpty() || itemDescTxt.isEmpty() || imageUri == null) {
+            if (itemNameTxt.isEmpty() || String.valueOf(priceTxt).isEmpty() || itemDescTxt.isEmpty() || imageUri == null) {
                 Toast.makeText(this, "Please complete all required fields", Toast.LENGTH_SHORT).show();
                 binding.progressBar2.setVisibility(View.GONE);
                 binding.btnSign.setVisibility(View.VISIBLE);
@@ -77,16 +77,19 @@ public class CreateProductActivity extends BaseActivity {
         });
     }
 
-    private void uploadData(String uid, String itemNameTxt, String oldPriceTxt, String priceTxt, String itemDescTxt, String imgUrl) {
+    private void uploadData(String uid, String itemNameTxt, double oldPriceTxt, double priceTxt, String itemDescTxt, String imgUrl) {
         // Create a unique key for each product under the "products" sub-node
         DatabaseReference newProductRef = productsRef.push();
 
         HashMap<String, Object> productData = new HashMap<>();
-        productData.put("productImage", imgUrl);
-        productData.put("itemName", itemNameTxt);
+        productData.put("productName", itemNameTxt);
         productData.put("oldPrice", oldPriceTxt);
         productData.put("price", priceTxt);
-        productData.put("itemDesc", itemDescTxt);
+        productData.put("description", itemDescTxt);
+
+        HashMap<String, Object> picUrlMap = new HashMap<>();
+        picUrlMap.put(String.valueOf(0), imgUrl);
+        productData.put("productImage", picUrlMap);
 
         // Save the product data
         newProductRef.setValue(productData).addOnCompleteListener(task -> {
@@ -103,7 +106,7 @@ public class CreateProductActivity extends BaseActivity {
         });
     }
 
-    private void uploadImageToStorage(String itemNameTxt, String oldPriceTxt, String priceTxt, String itemDescTxt) {
+    private void uploadImageToStorage() {
         // Generate unique ID for the image
         String uniqueID = UUID.randomUUID().toString();
         StorageReference imageRef = storageReference.child("product_images/" + uniqueID + ".jpg");
@@ -141,13 +144,7 @@ public class CreateProductActivity extends BaseActivity {
                         binding.progressBar.setVisibility(View.VISIBLE);
                         binding.readyView.setVisibility(View.GONE); // Hide checkmark initially
 
-                        // Upload the image to Firebase storage
-                        String itemNameTxt = String.valueOf(binding.itemName.getText());
-                        String oldPriceTxt = String.valueOf(binding.oldPrice.getText());
-                        String priceTxt = String.valueOf(binding.price.getText());
-                        String itemDescTxt = String.valueOf(binding.productDesc.getText());
-
-                        uploadImageToStorage(itemNameTxt, oldPriceTxt, priceTxt, itemDescTxt);  // Pass the parameters here
+                        uploadImageToStorage();  // Pass the parameters here
                     }
                 }
         );

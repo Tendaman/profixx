@@ -6,11 +6,10 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.profixx.Adapter.WishlistAdapter;
-import com.example.profixx.Domain.WishlistDomain;
+import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.databinding.ActivityWishlistBinding;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -19,7 +18,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -27,7 +25,7 @@ import java.util.ArrayList;
 public class WishlistActivity extends BaseActivity {
     private ActivityWishlistBinding binding;
     private WishlistAdapter adapter;
-    private ArrayList<WishlistDomain> items;
+    private ArrayList<ItemsDomain> items;
     private FirebaseAuth mAuth;
     private DatabaseReference wishlistRef;
 
@@ -86,7 +84,7 @@ public class WishlistActivity extends BaseActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             items.clear();
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                                WishlistDomain item = new WishlistDomain();
+                                ItemsDomain item = new ItemsDomain();
                                 item.setItemId(dataSnapshot.getKey());
                                 item.setTitle(dataSnapshot.child("title").getValue(String.class));
                                 item.setPrice(dataSnapshot.child("price").getValue(Double.class));

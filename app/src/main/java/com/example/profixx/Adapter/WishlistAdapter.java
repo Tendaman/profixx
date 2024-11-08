@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.profixx.Activity.DetailActivity;
 import com.example.profixx.Domain.ItemsDomain;
-import com.example.profixx.Domain.WishlistDomain;
 import com.example.profixx.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -29,12 +28,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHolder> {
-    private ArrayList<WishlistDomain> items;
+    private ArrayList<ItemsDomain> items;
     private Context context;
     private DatabaseReference wishlistRef;
     private FirebaseAuth mAuth;
 
-    public WishlistAdapter(ArrayList<WishlistDomain> items) {
+    public WishlistAdapter(ArrayList<ItemsDomain> items) {
         this.items = items;
         this.mAuth = FirebaseAuth.getInstance();
         this.wishlistRef = FirebaseDatabase.getInstance().getReference("users");
@@ -50,7 +49,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        WishlistDomain item = items.get(position);
+        ItemsDomain item = items.get(position);
 
         holder.titleTxt.setText(item.getTitle());
         holder.priceTxt.setText("$" + item.getPrice());
@@ -68,7 +67,6 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
 
         // Set up click listener for the entire item
         holder.itemLayout.setOnClickListener(v -> {
-            // Convert WishlistDomain to ItemsDomain for DetailActivity
             ItemsDomain itemsDomain = new ItemsDomain();
             itemsDomain.setTitle(item.getTitle());
             itemsDomain.setPrice(item.getPrice());
@@ -102,7 +100,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
     private void removeItem(final int position) {
         String userId = getCurrentUserId();
         if (userId != null && position >= 0 && position < items.size()) {
-            WishlistDomain itemToRemove = items.get(position);
+            ItemsDomain itemToRemove = items.get(position);
             String itemId = itemToRemove.getItemId(); // Assuming you have getId() method in WishlistDomain
 
             // Reference to the specific item in user's wishlist using the unique ID
@@ -140,7 +138,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         return items.size();
     }
 
-    public void updateList(ArrayList<WishlistDomain> newList) {
+    public void updateList(ArrayList<ItemsDomain> newList) {
         items = newList;
         notifyDataSetChanged();
     }
