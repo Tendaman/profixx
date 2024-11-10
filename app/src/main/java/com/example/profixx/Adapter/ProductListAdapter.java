@@ -3,6 +3,7 @@ package com.example.profixx.Adapter;
 import android.content.Context;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -47,8 +48,13 @@ public class ProductListAdapter extends RecyclerView.Adapter<ProductListAdapter.
         holder.binding.reviewTxt.setText(""+items.get(position).getReview());
         holder.binding.priceTxt.setText("$"+items.get(position).getPrice());
         holder.binding.ratingTxt.setText("("+items.get(position).getRating()+")");
-        holder.binding.oldPriceTxt.setText("$"+items.get(position).getOldPrice());
-        holder.binding.oldPriceTxt.setPaintFlags(holder.binding.oldPriceTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        if (items.get(position).getOldPrice() == null || items.get(position).getOldPrice() == 0) {
+            holder.binding.oldPriceTxt.setVisibility(View.GONE);
+        } else {
+            holder.binding.oldPriceTxt.setVisibility(View.VISIBLE);
+            holder.binding.oldPriceTxt.setText("$" + items.get(position).getOldPrice());
+            holder.binding.oldPriceTxt.setPaintFlags(holder.binding.oldPriceTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
         holder.binding.ratingBar.setRating((float)items.get(position).getRating());
 
         RequestOptions requestOptions = new RequestOptions();

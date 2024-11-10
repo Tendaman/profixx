@@ -59,9 +59,16 @@ public class CreateProductActivity extends BaseActivity {
             binding.textView21.setVisibility(View.GONE);
 
             String itemNameTxt = String.valueOf(binding.itemName.getText());
-            double oldPriceTxt = Double.parseDouble(String.valueOf(binding.oldPrice.getText()));
+            String oldPriceText = String.valueOf(binding.oldPrice.getText());
             double priceTxt = Double.parseDouble(String.valueOf(binding.price.getText()));
             String itemDescTxt = String.valueOf(binding.productDesc.getText());
+
+            Double oldPriceTxt = null; // Initialize as null
+
+            // Only parse oldPrice if field is not empty
+            if (!oldPriceText.isEmpty()) {
+                oldPriceTxt = Double.parseDouble(oldPriceText);
+            }
 
             // Validate fields before uploading
             if (itemNameTxt.isEmpty() || String.valueOf(priceTxt).isEmpty() || itemDescTxt.isEmpty() || imageUri == null) {
@@ -77,13 +84,16 @@ public class CreateProductActivity extends BaseActivity {
         });
     }
 
-    private void uploadData(String uid, String itemNameTxt, double oldPriceTxt, double priceTxt, String itemDescTxt, String imgUrl) {
+    private void uploadData(String uid, String itemNameTxt, Double oldPriceTxt, double priceTxt, String itemDescTxt, String imgUrl) {
         // Create a unique key for each product under the "products" sub-node
         DatabaseReference newProductRef = productsRef.push();
 
         HashMap<String, Object> productData = new HashMap<>();
         productData.put("title", itemNameTxt);
         productData.put("oldPrice", oldPriceTxt);
+        if (oldPriceTxt != null) {  // Add only if not null
+            productData.put("oldPrice", oldPriceTxt);
+        }
         productData.put("price", priceTxt);
         productData.put("description", itemDescTxt);
 

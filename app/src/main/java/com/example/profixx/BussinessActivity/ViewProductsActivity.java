@@ -86,7 +86,7 @@ public class ViewProductsActivity extends BaseActivity {
 
                                 item.setOldPrice(dataSnapshot.child("oldPrice").getValue(Double.class) != null
                                         ? dataSnapshot.child("oldPrice").getValue(Double.class)
-                                        : 0.0);
+                                        : null);
                                 item.setDescription(dataSnapshot.child("description").getValue(String.class));
                                 item.setRating(dataSnapshot.child("rating").getValue(Double.class) != null
                                         ? dataSnapshot.child("rating").getValue(Double.class)
