@@ -1,6 +1,7 @@
 package com.example.profixx.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -8,6 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.profixx.Activity.DetailActivity;
+import com.example.profixx.BussinessActivity.BusinessViewActivity;
 import com.example.profixx.Domain.CategoryDomain;
 import com.example.profixx.databinding.ViewholderCategoryBinding;
 
@@ -31,12 +34,21 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull CategoryAdapter.ViewHolder holder, int position) {
-        holder.binding.title.setText(items.get(position).getTitle());
+        CategoryDomain category = items.get(position);
+        String id = category.getId();
+        holder.binding.title.setText(category.getBusinessName());
 
         Glide.with(context)
-                .load(items.get(position).getPicUrl())
+                .load(category.getLogo())
                 .into(holder.binding.pic);
+
+        holder.binding.materialCardView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, BusinessViewActivity.class);
+            intent.putExtra("businessId", id);  // Pass the business id
+            context.startActivity(intent);
+        });
     }
+
 
     @Override
     public int getItemCount() {

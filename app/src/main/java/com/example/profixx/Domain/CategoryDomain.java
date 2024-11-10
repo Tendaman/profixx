@@ -2,16 +2,35 @@ package com.example.profixx.Domain;
 
 public class CategoryDomain {
     private String title;
-    private int id;
+    private String id;
     private String picUrl;
+    private String businessName;
+    private String logo;
 
-    public CategoryDomain(String title, int id, String picUrl) {
+    public CategoryDomain(String title, String id, String picUrl, String businessName) {
         this.title = title;
         this.id = id;
         this.picUrl = picUrl;
+        this.businessName = businessName;
     }
 
     public CategoryDomain(){
+    }
+
+    public String getBusinessName() {
+        return businessName;
+    }
+
+    public void setBusinessName(String businessName) {
+        this.businessName = businessName;
+    }
+
+    public String getLogo() {
+        return logo;
+    }
+
+    public void setLogo(String logo) {
+        this.logo = logo;
     }
 
     public String getTitle() {
@@ -22,11 +41,11 @@ public class CategoryDomain {
         this.title = title;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 

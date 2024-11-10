@@ -82,14 +82,14 @@ public class CreateProductActivity extends BaseActivity {
         DatabaseReference newProductRef = productsRef.push();
 
         HashMap<String, Object> productData = new HashMap<>();
-        productData.put("productName", itemNameTxt);
+        productData.put("title", itemNameTxt);
         productData.put("oldPrice", oldPriceTxt);
         productData.put("price", priceTxt);
         productData.put("description", itemDescTxt);
 
         HashMap<String, Object> picUrlMap = new HashMap<>();
         picUrlMap.put(String.valueOf(0), imgUrl);
-        productData.put("productImage", picUrlMap);
+        productData.put("picUrl", picUrlMap);
 
         // Save the product data
         newProductRef.setValue(productData).addOnCompleteListener(task -> {

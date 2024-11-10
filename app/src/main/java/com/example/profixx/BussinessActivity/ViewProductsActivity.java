@@ -68,16 +68,6 @@ public class ViewProductsActivity extends BaseActivity {
         binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    private String getCurrentUserId() {
-        // Check for Firebase user
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            return user.getUid();
-        }
-
-        return null;
-    }
-
     private void loadWishlistItems() {
         binding.productProgressbar.setVisibility(View.VISIBLE);
         if (uid != null) {
@@ -89,7 +79,7 @@ public class ViewProductsActivity extends BaseActivity {
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 ItemsDomain item = new ItemsDomain();
                                 item.setItemId(dataSnapshot.getKey());
-                                item.setTitle(dataSnapshot.child("productName").getValue(String.class));
+                                item.setTitle(dataSnapshot.child("title").getValue(String.class));
                                 item.setPrice(dataSnapshot.child("price").getValue(Double.class) != null
                                         ? dataSnapshot.child("price").getValue(Double.class)
                                         : 0.0);
@@ -106,9 +96,9 @@ public class ViewProductsActivity extends BaseActivity {
                                         : 0);
 
                                 // Handle picUrl if it exists
-                                if (dataSnapshot.hasChild("productImage")) {
+                                if (dataSnapshot.hasChild("picUrl")) {
                                     ArrayList<String> pics = new ArrayList<>();
-                                    for (DataSnapshot picSnapshot : dataSnapshot.child("productImage").getChildren()) {
+                                    for (DataSnapshot picSnapshot : dataSnapshot.child("picUrl").getChildren()) {
                                         pics.add(picSnapshot.getValue(String.class));
                                     }
                                     item.setPicUrl(pics);

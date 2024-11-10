@@ -6,12 +6,24 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:id="@+id/pic"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/materialCardView"
         android:layout_width="55dp"
         android:layout_height="55dp"
+        android:layout_gravity="center"
         android:layout_marginTop="8dp"
-        app:srcCompat="@drawable/cat1" />
+        app:cardCornerRadius="60dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/pic"
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            app:srcCompat="@drawable/cat1" />
+
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/title"
