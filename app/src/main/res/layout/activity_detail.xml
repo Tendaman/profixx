@@ -128,7 +128,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="0 ratings"
+                    android:text="6"
                     android:textColor="@color/black"
                     android:textSize="16sp" />
 
@@ -196,7 +196,7 @@
                 <androidx.viewpager.widget.ViewPager
                     android:id="@+id/viewpager"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="250dp"
                     android:background="@color/white" />
 
             </LinearLayout>

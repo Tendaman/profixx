@@ -25,6 +25,7 @@ public class ItemsDomain implements Serializable {
         this.oldPrice = oldPrice;
         this.review = review;
         this.rating = rating;
+        this.itemId = itemId;
     }
 
     public String getTitle() {
@@ -99,6 +100,3 @@ public class ItemsDomain implements Serializable {
         this.itemId = itemId;
     }
 }
-
-
-

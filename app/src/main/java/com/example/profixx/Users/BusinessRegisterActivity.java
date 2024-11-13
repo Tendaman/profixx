@@ -68,7 +68,6 @@ public class BusinessRegisterActivity extends BaseActivity {
             String businessEmailTxt = String.valueOf(binding.businessEmail.getText());
             String businessPhoneTxt = String.valueOf(binding.phoneNum.getText());
             String businessDescTxt = String.valueOf(binding.businessDesc.getText());
-            String businessEmailAddressTxt = String.valueOf(binding.businessEmail.getText());
             String businessPasswordTxt = String.valueOf(binding.passwordBusiness.getText());
             String businessConfirmPasswordTxt = String.valueOf(binding.conBusinessPassword.getText());
 

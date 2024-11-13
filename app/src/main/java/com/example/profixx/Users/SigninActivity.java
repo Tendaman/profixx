@@ -3,6 +3,7 @@ package com.example.profixx.Users;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -21,11 +22,17 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
 
 public class SigninActivity extends BaseActivity {
     TextInputEditText email, password;
     Button login, googleBtn, businessLogin;
     FirebaseAuth mAuth;
+    FirebaseDatabase database;
+    DatabaseReference usersRef;
     ProgressBar progressBar;
     TextView signup;
     GoogleSignInOptions gso;
@@ -55,6 +62,10 @@ public class SigninActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
         mAuth = FirebaseAuth.getInstance();
+
+        database = FirebaseDatabase.getInstance();
+        usersRef = database.getReference("users");
+
         email = findViewById(R.id.emailtxt);
         password = findViewById(R.id.password_txt);
         login = findViewById(R.id.btnSignIn);
@@ -79,39 +90,36 @@ public class SigninActivity extends BaseActivity {
             }
         });
 
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                String emailtxt = String.valueOf(email.getText());
-                String passwordtxt = String.valueOf(password.getText());
-                if (TextUtils.isEmpty(emailtxt)) {
-                    Toast.makeText(SigninActivity.this, "Enter Email", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (TextUtils.isEmpty(passwordtxt)) {
-                    Toast.makeText(SigninActivity.this, "Enter Password", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (TextUtils.isEmpty(emailtxt) && TextUtils.isEmpty(passwordtxt)) {
-                    Toast.makeText(SigninActivity.this, "Fill in your details", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                mAuth.signInWithEmailAndPassword(emailtxt, passwordtxt)
-                        .addOnCompleteListener(task -> {
-                            progressBar.setVisibility(View.GONE);
-                            if (task.isSuccessful()) {
-                                Toast.makeText(SigninActivity.this, "Authentication successful.", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(SigninActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                Toast.makeText(SigninActivity.this, "Authentication failed.",
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
+        login.setOnClickListener(v -> {
+            progressBar.setVisibility(View.VISIBLE);
+            String emailtxt = String.valueOf(email.getText());
+            String passwordtxt = String.valueOf(password.getText());
+            if (TextUtils.isEmpty(emailtxt)) {
+                Toast.makeText(SigninActivity.this, "Enter Email", Toast.LENGTH_SHORT).show();
+                return;
             }
+            if (TextUtils.isEmpty(passwordtxt)) {
+                Toast.makeText(SigninActivity.this, "Enter Password", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (TextUtils.isEmpty(emailtxt) && TextUtils.isEmpty(passwordtxt)) {
+                Toast.makeText(SigninActivity.this, "Fill in your details", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            mAuth.signInWithEmailAndPassword(emailtxt, passwordtxt)
+                    .addOnCompleteListener(task -> {
+                        progressBar.setVisibility(View.GONE);
+                        if (task.isSuccessful()) {
+                            Toast.makeText(SigninActivity.this, "Authentication successful.", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(SigninActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(SigninActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         });
 
         signup.setOnClickListener(v -> {
@@ -151,12 +159,80 @@ public class SigninActivity extends BaseActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
-            Toast.makeText(this, "Signed in successfully", Toast.LENGTH_SHORT).show();
-            updateUI(account);
+
+            if (account != null) {
+                // Get user details from Google Account
+                String email = account.getEmail();
+                String username = account.getDisplayName();
+                String userId = account.getId();
+                String photoUrl = account.getPhotoUrl() != null ? account.getPhotoUrl().toString() : "";
+
+                // Check if the user already exists in the database
+                checkAndSaveUserData(userId, username, email, photoUrl);
+
+                Toast.makeText(this, "Signed in successfully", Toast.LENGTH_SHORT).show();
+                updateUI(account);
+            }
         } catch (ApiException e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
             updateUI(null);
         }
     }
+
+    private void checkAndSaveUserData(String userId, String username, String email, String photoUrl) {
+        DatabaseReference userRef = usersRef.child(userId);
+
+        userRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                if (task.getResult().exists()) {
+                    // User exists, check for missing data and update if necessary
+                    HashMap<String, Object> updatedData = new HashMap<>();
+
+                    if (!task.getResult().hasChild("username") || TextUtils.isEmpty(task.getResult().child("username").getValue(String.class))) {
+                        updatedData.put("username", username);
+                    }
+                    if (!task.getResult().hasChild("email") || TextUtils.isEmpty(task.getResult().child("email").getValue(String.class))) {
+                        updatedData.put("email", email);
+                    }
+                    if (!task.getResult().hasChild("photoUrl") || TextUtils.isEmpty(task.getResult().child("photoUrl").getValue(String.class))) {
+                        updatedData.put("photoUrl", photoUrl);
+                    }
+
+                    if (!updatedData.isEmpty()) {
+                        userRef.updateChildren(updatedData).addOnCompleteListener(updateTask -> {
+                            if (updateTask.isSuccessful()) {
+                                Log.d("SigninActivity", "User data updated in database.");
+                            } else {
+                                Log.e("SigninActivity", "Failed to update user data", updateTask.getException());
+                            }
+                        });
+                    }
+
+                } else {
+                    // User doesn't exist, save new data
+                    HashMap<String, Object> userData = new HashMap<>();
+                    userData.put("username", username);
+                    userData.put("email", email);
+                    userData.put("photoUrl", photoUrl);
+                    userData.put("phone", ""); // Default or empty if phone data is not available
+
+                    userRef.setValue(userData).addOnCompleteListener(saveTask -> {
+                        if (saveTask.isSuccessful()) {
+                            Log.d("SigninActivity", "Google user data saved to database");
+                        } else {
+                            Log.e("SigninActivity", "Failed to save Google user data", saveTask.getException());
+                            Toast.makeText(getApplicationContext(),
+                                    "Failed to save user data", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } else {
+                Log.e("SigninActivity", "Error checking user existence", task.getException());
+                Toast.makeText(getApplicationContext(),
+                        "Error checking user data", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
 }

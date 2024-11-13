@@ -27,12 +27,15 @@ import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity {
     private ActivityMainBinding binding;
+    String businessId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        businessId = getIntent().getStringExtra("businessId");
 
         initBanner();
         initCategory();
@@ -64,7 +67,7 @@ public class MainActivity extends BaseActivity {
                                 MainActivity.this,
                                 2
                                 ));
-                        binding.recyclerViewPopular.setAdapter(new PopularAdapter(items));
+                        binding.recyclerViewPopular.setAdapter(new PopularAdapter(items, businessId));
                     }
                     binding.progressBarPopular.setVisibility(View.GONE);
                 }

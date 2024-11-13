@@ -53,6 +53,7 @@ public class DetailActivity extends BaseActivity {
     private DatabaseReference wishlistRef;
     private boolean isInWishlist = false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +66,9 @@ public class DetailActivity extends BaseActivity {
         wishlistRef = database.getReference("users");
 
         managmentCart = new ManagmentCart(this);
+
+        String id = getIntent().getStringExtra("itemId");
+        Toast.makeText(this, "This is " + id, Toast.LENGTH_SHORT).show();
 
         getBundle();
         initbanners();
@@ -215,6 +219,7 @@ public class DetailActivity extends BaseActivity {
 
     private void getBundle() {
         object = (ItemsDomain) getIntent().getSerializableExtra("object");
+        assert object != null;
         binding.titleTxt.setText(object.getTitle());
         binding.priceTxt.setText("$" + object.getPrice());
         binding.ratingBar.setRating((float) object.getRating());
@@ -227,6 +232,11 @@ public class DetailActivity extends BaseActivity {
         binding.backBtn.setOnClickListener(v -> finish());
     }
     private void setupViewPager(){
+
+        // Get the passed businessId from the Intent
+        String businessId = getIntent().getStringExtra("businessId");
+        String itemId = getIntent().getStringExtra("itemId");
+
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         DescriptionFragment tab1 = new DescriptionFragment();
         ReviewFragment tab2 = new ReviewFragment();
@@ -237,14 +247,17 @@ public class DetailActivity extends BaseActivity {
         Bundle bundle3 = new Bundle();
 
         bundle1.putString("description", object.getDescription());
+        bundle3.putString("businessId", businessId);
+        bundle3.putString("itemId", itemId);
+
 
         tab1.setArguments(bundle1);
         tab2.setArguments(bundle2);
         tab3.setArguments(bundle3);
 
-        adapter.addFrag(tab1, "Descriptions");
+        adapter.addFrag(tab1, "Description");
         adapter.addFrag(tab2, "Reviews");
-        adapter.addFrag(tab3, "Sold");
+        adapter.addFrag(tab3, "Comment");
 
         binding.viewpager.setAdapter(adapter);
         binding.tabLayout.setupWithViewPager(binding.viewpager);
@@ -254,7 +267,7 @@ public class DetailActivity extends BaseActivity {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
         public ViewPagerAdapter(@NonNull FragmentManager fm) {
-            super(fm);
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         }
 
         @NonNull

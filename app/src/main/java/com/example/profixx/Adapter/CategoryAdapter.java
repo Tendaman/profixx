@@ -9,8 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.profixx.Activity.DetailActivity;
-import com.example.profixx.BussinessActivity.BusinessViewActivity;
+import com.example.profixx.Activity.BusinessViewActivity;
 import com.example.profixx.Domain.CategoryDomain;
 import com.example.profixx.databinding.ViewholderCategoryBinding;
 

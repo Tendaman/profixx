@@ -227,23 +227,48 @@ public class SignupActivity extends BaseActivity {
         // Check if user already exists
         userRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
+                if (task.getResult().exists()) {
+                    // User exists, check for missing data and update if necessary
+                    HashMap<String, Object> updatedData = new HashMap<>();
 
+                    if (!task.getResult().hasChild("username") || TextUtils.isEmpty(task.getResult().child("username").getValue(String.class))) {
+                        updatedData.put("username", username);
+                    }
+                    if (!task.getResult().hasChild("email") || TextUtils.isEmpty(task.getResult().child("email").getValue(String.class))) {
+                        updatedData.put("email", email);
+                    }
+                    if (!task.getResult().hasChild("photoUrl") || TextUtils.isEmpty(task.getResult().child("photoUrl").getValue(String.class))) {
+                        updatedData.put("photoUrl", photoUrl);
+                    }
+
+                    if (!updatedData.isEmpty()) {
+                        userRef.updateChildren(updatedData).addOnCompleteListener(updateTask -> {
+                            if (updateTask.isSuccessful()) {
+                                Log.d("SigninActivity", "User data updated in database.");
+                            } else {
+                                Log.e("SigninActivity", "Failed to update user data", updateTask.getException());
+                            }
+                        });
+                    }
+
+                } else {
+                    // User doesn't exist, save new data
                     HashMap<String, Object> userData = new HashMap<>();
                     userData.put("username", username);
                     userData.put("email", email);
-                    userData.put("phone", "");
                     userData.put("photoUrl", photoUrl);
+                    userData.put("phone", ""); // Default or empty if phone data is not available
 
                     userRef.setValue(userData).addOnCompleteListener(saveTask -> {
                         if (saveTask.isSuccessful()) {
-                            Log.d("SignupActivity", "Google user data saved to database");
+                            Log.d("SigninActivity", "Google user data saved to database");
                         } else {
-                            Log.e("SignupActivity", "Failed to save Google user data", saveTask.getException());
-                            Toast.makeText(SignupActivity.this,
+                            Log.e("SigninActivity", "Failed to save Google user data", saveTask.getException());
+                            Toast.makeText(getApplicationContext(),
                                     "Failed to save user data", Toast.LENGTH_SHORT).show();
                         }
                     });
-
+                }
             } else {
                 Log.e("SignupActivity", "Error checking user existence", task.getException());
                 Toast.makeText(SignupActivity.this,

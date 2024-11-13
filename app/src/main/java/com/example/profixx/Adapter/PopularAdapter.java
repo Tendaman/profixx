@@ -23,8 +23,11 @@ import java.util.ArrayList;
 public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHolder>{
     ArrayList<ItemsDomain> items;
     Context context;
-    public PopularAdapter(ArrayList<ItemsDomain> items) {
+    private final String businessId;
+
+    public PopularAdapter(ArrayList<ItemsDomain> items, String businessId) {
         this.items = items;
+        this.businessId = businessId;
     }
 
     @NonNull
@@ -61,8 +64,13 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
         holder.itemView.setOnClickListener(v -> {
             int currentPosition = holder.getAdapterPosition();
             if (currentPosition != RecyclerView.NO_POSITION) { // Check that the position is valid
+                ItemsDomain currentItem = items.get(currentPosition);
+
                 Intent intent = new Intent(context, DetailActivity.class);
-                intent.putExtra("object", items.get(currentPosition));
+                intent.putExtra("object", currentItem);
+                intent.putExtra("businessId", businessId);
+                intent.putExtra("itemId", currentItem.getItemId());
+
                 context.startActivity(intent);
             }
         });
@@ -74,7 +82,7 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
         return items.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         ViewholderPopListBinding binding;
         public ViewHolder(@NonNull ViewholderPopListBinding binding) {
             super(binding.getRoot());

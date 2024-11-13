@@ -1,13 +1,19 @@
 package com.example.profixx.Activity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -26,6 +32,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 
 import java.util.HashMap;
 
@@ -44,6 +53,10 @@ public class ProfileActivity extends BaseActivity {
     Button saveBtn;
     DatabaseReference myRef;
 
+    StorageReference storageReference;
+    private Uri imageUri;
+    ActivityResultLauncher<Intent> imagePickerLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,9 +66,39 @@ public class ProfileActivity extends BaseActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
+        storageReference = FirebaseStorage.getInstance().getReference();
 
         // Initialize UI elements
         initializeViews();
+
+
+
+        imagePickerLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                        imageUri = result.getData().getData();
+
+                        // Upload the image to Firebase Storage
+                        StorageReference fileReference = storageReference.child("profile_pics/" + System.currentTimeMillis() + ".jpg");
+                        fileReference.putFile(imageUri)
+                                .addOnSuccessListener(taskSnapshot -> fileReference.getDownloadUrl().addOnSuccessListener(uri -> {
+                                    String downloadUrl = uri.toString();
+                                    if (user != null) {
+                                        updateProfilePhotoUrl(user.getUid(), downloadUrl, null);
+                                    } else {
+                                        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(ProfileActivity.this);
+                                        if (acct != null) {
+                                            updateProfilePhotoUrl(acct.getId(), downloadUrl, acct);
+                                        }
+                                    }
+                                }))
+                                .addOnFailureListener(e -> Toast.makeText(ProfileActivity.this, "Failed to upload image", Toast.LENGTH_SHORT).show());
+                    }
+                }
+        );
+
+
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -83,26 +126,29 @@ public class ProfileActivity extends BaseActivity {
     }
 
     private void loadUserData(String userId, GoogleSignInAccount acct) {
-        if (acct != null) {
-            // Set Google account information
-            username.setText(acct.getDisplayName());
-            email.setText(acct.getEmail());
-            phoneNumber.setText("No phone number");
-
-            if (acct.getPhotoUrl() != null) {
-                Glide.with(this)
-                        .load(acct.getPhotoUrl())
-                        .into(profilePic);
-            } else {
-                profilePic.setImageResource(R.drawable.baseline_perm_identity_24);
-            }
-        }
-
-        // Load shipping details from Firebase for both Google and regular users
+        // Load user data from Firebase
         myRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
+                    // Retrieve and set the user's basic info from Firebase
+                    String usernameText = snapshot.child("username").getValue(String.class);
+                    String emailText = snapshot.child("email").getValue(String.class);
+                    String photoUrl = snapshot.child("photoUrl").getValue(String.class);  // Profile photo URL
+
+                    // Set values to UI components
+                    username.setText(usernameText != null ? usernameText : "No username");
+                    email.setText(emailText != null ? emailText : "No email");
+
+                    // Display the photo URL if available, or fallback to default image
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(ProfileActivity.this)
+                                .load(photoUrl)
+                                .into(profilePic);
+                    } else {
+                        profilePic.setImageResource(R.drawable.baseline_perm_identity_24);  // Default image if no photo
+                    }
+
                     // Load shipping details
                     String addressText = snapshot.child("address").getValue(String.class);
                     String suburbText = snapshot.child("suburb").getValue(String.class);
@@ -117,19 +163,9 @@ public class ProfileActivity extends BaseActivity {
                     suburb.setText(suburbText != null ? suburbText : "");
                     city.setText(cityText != null ? cityText : "");
                     country.setText(countryText != null ? countryText : "");
-                    province.setText(countryText != null ? provinceText : "");
+                    province.setText(provinceText != null ? provinceText : "");
                     postalCode.setText(postalCodeText != null ? postalCodeText : "");
                     phoneNumber.setText(phoneText != null ? phoneText : "No phone number");
-
-                    // If it's a regular user, also load their basic info
-                    if (acct == null) {
-                        String usernameText = snapshot.child("username").getValue(String.class);
-                        String emailText = snapshot.child("email").getValue(String.class);
-
-                        username.setText(usernameText != null ? usernameText : "No username");
-                        email.setText(emailText != null ? emailText : "No email");
-                        profilePic.setImageResource(R.drawable.baseline_perm_identity_24);
-                    }
                 }
             }
 
@@ -143,6 +179,8 @@ public class ProfileActivity extends BaseActivity {
     private void setupClickListeners(String userId) {
         logoutBtn.setOnClickListener(v -> logoutMethod());
         backBtn.setOnClickListener(v -> finish());
+
+        profilePic.setOnClickListener(v -> showImageOptionsDialog(userId));
 
         // Set the save button as hidden and fields as disabled by default
         saveBtn.setVisibility(View.GONE);
@@ -166,6 +204,95 @@ public class ProfileActivity extends BaseActivity {
         });
 
         phoneSave.setOnClickListener(v -> savePhoneNumber(userId));
+    }
+
+    private void showImageOptionsDialog(String userId) {
+        // Create and show a dialog based on the presence of a photo URL in the database
+        myRef.child(userId).child("photoUrl").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String photoUrl = snapshot.getValue(String.class);
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                builder.setTitle("Profile Image Options");
+
+                if (photoUrl != null && !photoUrl.isEmpty()) {
+                    // Photo exists: show Update and Delete options
+                    builder.setItems(new String[]{"Update Profile Image", "Delete profile Image"}, (dialog, which) -> {
+                        switch (which) {
+                            case 0:
+                                // Handle photo update
+                                updateProfilePhoto();
+                                break;
+                            case 1:
+                                // Handle photo deletion
+                                deleteProfilePhoto(userId);
+                                break;
+                        }
+                    });
+                } else {
+                    // No photo URL: show Insert Photo option
+                    builder.setItems(new String[]{"Insert Photo"}, (dialog, which) -> {
+                        // Handle photo insert
+                        insertProfilePhoto();
+                    });
+                }
+
+                builder.setCancelable(true);
+                builder.show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(ProfileActivity.this, "Error loading photo options", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void updateProfilePhoto() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        imagePickerLauncher.launch(Intent.createChooser(intent, "Select Image"));
+    }
+
+
+
+    private void updateProfilePhotoUrl(String userId, String downloadUrl, GoogleSignInAccount acct) {
+        HashMap<String, Object> updates = new HashMap<>();
+        updates.put("photoUrl", downloadUrl);
+
+        myRef.child(userId).updateChildren(updates)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Glide.with(ProfileActivity.this)
+                                .load(downloadUrl)
+                                .into(profilePic);
+                        Toast.makeText(ProfileActivity.this, "Profile photo updated", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ProfileActivity.this, "Failed to update profile photo", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void deleteProfilePhoto(String userId) {
+        // Remove photo URL from Firebase Database and clear the ImageView
+        myRef.child(userId).child("photoUrl").removeValue()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        profilePic.setImageResource(R.drawable.baseline_perm_identity_24);
+                        Toast.makeText(ProfileActivity.this, "Profile photo deleted", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(ProfileActivity.this, "Failed to delete profile photo", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void insertProfilePhoto() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        imagePickerLauncher.launch(Intent.createChooser(intent, "Select Image"));
     }
 
     private void savePhoneNumber(String userId) {
@@ -265,8 +392,4 @@ public class ProfileActivity extends BaseActivity {
         }
     }
 
-    private void setVariable() {
-        backBtn = findViewById(R.id.backBtn);
-        backBtn.setOnClickListener(v -> finish());
-    }
 }
