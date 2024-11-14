@@ -72,6 +72,7 @@ public class DetailActivity extends BaseActivity {
         String id = getIntent().getStringExtra("itemId");
 
         getBundle();
+        loadAndSetRatings();
         initbanners();
         initSize();
         setupViewPager();
@@ -223,14 +224,61 @@ public class DetailActivity extends BaseActivity {
         assert object != null;
         binding.titleTxt.setText(object.getTitle());
         binding.priceTxt.setText("$" + object.getPrice());
-        binding.ratingBar.setRating((float) object.getRating());
-        binding.ratingTxt.setText(object.getRating()+"Rating");
 
         binding.addTocartBtn.setOnClickListener(v -> {
             object.setNumberInCart(numberOrder);
             managmentCart.insertFood(object);
         });
         binding.backBtn.setOnClickListener(v -> finish());
+    }
+
+    private void loadAndSetRatings() {
+        String businessId = getIntent().getStringExtra("businessId");
+        String itemId = getIntent().getStringExtra("itemId");
+
+        // Reference to the product's reviews in Firebase
+        assert businessId != null;
+        assert itemId != null;
+        DatabaseReference ratingsRef = FirebaseDatabase.getInstance()
+                .getReference("businesses")
+                .child(businessId)
+                .child("products")
+                .child(itemId)
+                .child("reviews");
+
+        ratingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalReviews = (int) snapshot.getChildrenCount();
+                double totalRating = 0;
+
+                // Calculate the total rating by summing up individual review ratings
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Double rating = dataSnapshot.child("rating").getValue(Double.class);
+                    if (rating != null && rating > 0) {
+                        totalRating += rating;
+                    }
+                }
+
+                // Calculate and set the average rating if there are reviews
+                if (totalReviews > 0) {
+                    double averageRating = totalRating / totalReviews;
+                    binding.ratingTxt.setText(String.format("%.1f", averageRating));
+                    binding.ratingBar.setRating((float) averageRating);
+                } else {
+                    // Set to default values if no reviews are present
+                    binding.ratingTxt.setText("0");
+                    binding.ratingBar.setRating(0);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(DetailActivity.this, "Failed to load ratings", Toast.LENGTH_SHORT).show();
+                binding.ratingTxt.setText("0");
+                binding.ratingBar.setRating(0);
+            }
+        });
     }
     private void setupViewPager(){
         String businessId = getIntent().getStringExtra("businessId");

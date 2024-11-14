@@ -15,6 +15,8 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.profixx.Activity.DetailActivity;
 import com.example.profixx.Domain.ItemsDomain;
+import com.example.profixx.Domain.ProductReviewDomain;
+import com.example.profixx.Domain.ReviewDomain;
 import com.example.profixx.R;
 import com.example.profixx.databinding.ViewholderPopListBinding;
 import com.google.firebase.database.DataSnapshot;
@@ -48,7 +50,6 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
         holder.binding.title.setText(items.get(position).getTitle());
         holder.binding.reviewTxt.setText(""+items.get(position).getReview());
         holder.binding.priceTxt.setText("$"+items.get(position).getPrice());
-        holder.binding.ratingTxt.setText("("+items.get(position).getRating()+")");
         if (items.get(position).getOldPrice() == null || items.get(position).getOldPrice() == 0) {
             holder.binding.oldPriceTxt.setVisibility(View.GONE);
         } else {
@@ -56,7 +57,6 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
             holder.binding.oldPriceTxt.setText("$" + items.get(position).getOldPrice());
             holder.binding.oldPriceTxt.setPaintFlags(holder.binding.oldPriceTxt.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
-        holder.binding.ratingBar.setRating((float)items.get(position).getRating());
 
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transform(new CenterCrop());
@@ -82,6 +82,46 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
 
         loadReviewCount(holder, items.get(position).getItemId());
 
+        loadRating(holder, items.get(position).getItemId());
+
+    }
+
+    private void loadRating(ViewHolder holder, String itemId) {
+        DatabaseReference ratingsRef = FirebaseDatabase.getInstance()
+                .getReference("businesses")
+                .child(businessId)
+                .child("products")
+                .child(itemId)
+                .child("reviews");
+
+        ratingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalReviews = (int) snapshot.getChildrenCount();
+                double totalRating = 0;
+
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    ReviewDomain review = dataSnapshot.getValue(ReviewDomain.class);
+                    if (review != null && review.getRating() > 0) {
+                        totalRating += review.getRating();
+                    }
+                }
+
+                if (totalReviews > 0) {
+                    double averageRating = totalRating / totalReviews;
+                    holder.binding.ratingTxt.setText(String.format("%.1f", averageRating));
+                    holder.binding.ratingBar.setRating((float) averageRating);
+                } else {
+                    holder.binding.ratingTxt.setText("0");
+                    holder.binding.ratingBar.setRating(0);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                holder.binding.ratingTxt.setText("0");
+            }
+        });
     }
 
     private void loadReviewCount(PopularAdapter.ViewHolder holder, String productId) {

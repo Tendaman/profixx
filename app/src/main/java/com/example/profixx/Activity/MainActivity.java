@@ -93,12 +93,17 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    for (DataSnapshot issue : snapshot.getChildren()) {
-                        CategoryDomain category = issue.getValue(CategoryDomain.class);
+                    for (DataSnapshot businessSnapshot : snapshot.getChildren()) {
+                        // Skip only the specified business ID
+                        if (businessSnapshot.getKey().equals("wIa0mvasuYNhgTkpnOGRhI1xklI3")) {
+                            continue; // Ignore this business and move to the next one
+                        }
 
-                        // Manually set the ID from the Firebase key if it's not automatically mapped
+                        CategoryDomain category = businessSnapshot.getValue(CategoryDomain.class);
+
+                        // Set ID from the snapshot key if the category is not null
                         if (category != null) {
-                            category.setId(issue.getKey());  // Set ID from the snapshot key
+                            category.setId(businessSnapshot.getKey()); // Set ID from the business snapshot key
                             items.add(category);
                         }
                     }
