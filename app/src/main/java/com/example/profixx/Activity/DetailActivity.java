@@ -68,7 +68,6 @@ public class DetailActivity extends BaseActivity {
         managmentCart = new ManagmentCart(this);
 
         String id = getIntent().getStringExtra("itemId");
-        Toast.makeText(this, "This is " + id, Toast.LENGTH_SHORT).show();
 
         getBundle();
         initbanners();
@@ -281,7 +280,7 @@ public class DetailActivity extends BaseActivity {
             return mFragmentList.size();
         }
 
-        private void addFrag(Fragment fragment, String title){
+        public void addFrag(Fragment fragment, String title){
             mFragmentList.add(fragment);
             mFragmentTitleList.add(title);
         }

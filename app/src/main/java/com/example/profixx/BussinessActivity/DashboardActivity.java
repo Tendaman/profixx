@@ -44,7 +44,15 @@ public class DashboardActivity extends BaseActivity {
         initLoadData();
         initFab();
         initSignout();
+        ViewReviewActivity();
         ViewProductActivity();
+    }
+
+    private void ViewReviewActivity() {
+        binding.reviews.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, BusinessReviewsActivity.class));
+            finish();
+        });
     }
 
     private void ViewProductActivity() {

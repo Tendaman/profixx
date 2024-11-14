@@ -102,23 +102,22 @@
                         android:id="@+id/username"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:text="username"
                         android:textColor="@color/black"
                         android:textSize="24dp"
-                        app:layout_constraintEnd_toEndOf="@+id/view2"
-                        app:layout_constraintStart_toStartOf="@+id/view2"
-                        app:layout_constraintTop_toBottomOf="@+id/view2" />
+                        app:layout_constraintEnd_toEndOf="@+id/textView40"
+                        app:layout_constraintStart_toStartOf="@+id/textView40"
+                        app:layout_constraintTop_toBottomOf="@+id/textView40" />
 
                     <TextView
                         android:id="@+id/textView40"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
                         android:text="Click image to update"
-                        app:layout_constraintBottom_toBottomOf="@+id/view2"
-                        app:layout_constraintStart_toEndOf="@+id/view2"
-                        app:layout_constraintTop_toTopOf="@+id/view2" />
+                        app:layout_constraintEnd_toEndOf="@+id/view2"
+                        app:layout_constraintStart_toStartOf="@+id/view2"
+                        app:layout_constraintTop_toBottomOf="@+id/view2" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <TextView

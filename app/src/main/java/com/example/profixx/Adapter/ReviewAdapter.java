@@ -47,7 +47,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.Viewholder
         return items.size();
     }
 
-    public class Viewholder extends RecyclerView.ViewHolder {
+    public static class Viewholder extends RecyclerView.ViewHolder {
         ViewholderReviewBinding binding;
         public Viewholder(ViewholderReviewBinding binding) {
             super(binding.getRoot());
