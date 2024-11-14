@@ -17,6 +17,11 @@ import com.example.profixx.Activity.DetailActivity;
 import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.R;
 import com.example.profixx.databinding.ViewholderPopListBinding;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -75,6 +80,30 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.ViewHold
             }
         });
 
+        loadReviewCount(holder, items.get(position).getItemId());
+
+    }
+
+    private void loadReviewCount(PopularAdapter.ViewHolder holder, String productId) {
+        DatabaseReference reviewsRef = FirebaseDatabase.getInstance()
+                .getReference("businesses")
+                .child(businessId)
+                .child("products")
+                .child(productId)
+                .child("reviews");
+
+        reviewsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int reviewCount = (int) snapshot.getChildrenCount();
+                holder.binding.reviewTxt.setText(String.valueOf(reviewCount));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                holder.binding.reviewTxt.setText("0");
+            }
+        });
     }
 
     @Override

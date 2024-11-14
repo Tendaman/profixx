@@ -27,6 +27,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends BaseActivity {
     private ActivityMainBinding binding;
+
     String businessId;
 
     @Override
@@ -35,7 +36,7 @@ public class MainActivity extends BaseActivity {
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        businessId = getIntent().getStringExtra("businessId");
+        businessId = "wIa0mvasuYNhgTkpnOGRhI1xklI3";
 
         initBanner();
         initCategory();
@@ -51,7 +52,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initPopular() {
-        DatabaseReference myRef = database.getReference("Items");
+        DatabaseReference myRef = database.getReference("businesses").child(businessId).child("products");
         binding.progressBarPopular.setVisibility(View.VISIBLE);
         ArrayList<ItemsDomain> items = new ArrayList<>();
 
@@ -60,14 +61,18 @@ public class MainActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     for (DataSnapshot issue : snapshot.getChildren()) {
-                        items.add(issue.getValue(ItemsDomain.class));
+                        ItemsDomain item = issue.getValue(ItemsDomain.class);
+                        if (item != null) {
+                            item.setItemId(issue.getKey());
+                            items.add(item);
+                        }
                     }
                     if (!items.isEmpty()){
                         binding.recyclerViewPopular.setLayoutManager(new GridLayoutManager(
                                 MainActivity.this,
                                 2
                                 ));
-                        binding.recyclerViewPopular.setAdapter(new PopularAdapter(items, businessId));
+                        binding.recyclerViewPopular.setAdapter(new PopularAdapter(items, "wIa0mvasuYNhgTkpnOGRhI1xklI3"));
                     }
                     binding.progressBarPopular.setVisibility(View.GONE);
                 }

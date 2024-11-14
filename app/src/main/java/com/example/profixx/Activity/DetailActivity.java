@@ -23,7 +23,9 @@ import com.example.profixx.Adapter.SliderAdapter;
 import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.Domain.SliderItems;
 import com.example.profixx.Fragment.DescriptionFragment;
+import com.example.profixx.Fragment.ProductReviewFragment;
 import com.example.profixx.Fragment.ReviewFragment;
+import com.example.profixx.Fragment.ReviewedProductFragment;
 import com.example.profixx.Fragment.SoldFragment;
 import com.example.profixx.Helper.ManagmentCart;
 import com.example.profixx.R;
@@ -231,14 +233,12 @@ public class DetailActivity extends BaseActivity {
         binding.backBtn.setOnClickListener(v -> finish());
     }
     private void setupViewPager(){
-
-        // Get the passed businessId from the Intent
         String businessId = getIntent().getStringExtra("businessId");
         String itemId = getIntent().getStringExtra("itemId");
 
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         DescriptionFragment tab1 = new DescriptionFragment();
-        ReviewFragment tab2 = new ReviewFragment();
+        ProductReviewFragment tab2 = new ProductReviewFragment();
         SoldFragment tab3 = new SoldFragment();
 
         Bundle bundle1 = new Bundle();
@@ -248,7 +248,8 @@ public class DetailActivity extends BaseActivity {
         bundle1.putString("description", object.getDescription());
         bundle3.putString("businessId", businessId);
         bundle3.putString("itemId", itemId);
-
+        bundle2.putString("businessId", businessId);
+        bundle2.putString("itemId", itemId);
 
         tab1.setArguments(bundle1);
         tab2.setArguments(bundle2);
