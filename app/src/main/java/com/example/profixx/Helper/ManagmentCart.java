@@ -11,6 +11,7 @@ public class ManagmentCart {
 
     private Context context;
     private TinyDB tinyDB;
+    String businessId;
 
     public ManagmentCart(Context context) {
         this.context = context;
@@ -18,11 +19,13 @@ public class ManagmentCart {
     }
 
     public void insertFood (ItemsDomain item) {
+        businessId = item.getBusinessId();
         ArrayList<ItemsDomain> listfood = getListCart();
         boolean existAlready = false;
         int n = 0;
         for (int y = 0; y < listfood.size(); y++) {
             if (listfood.get(y).getTitle().equals(item.getTitle())) {
+                businessId = listfood.get(y).getBusinessId();
                 existAlready = true;
                 n = y;
                 break;
@@ -30,8 +33,10 @@ public class ManagmentCart {
         }
         if (existAlready) {
             listfood.get(n).setNumberInCart(item.getNumberInCart());
+            listfood.get(n).setBusinessId(businessId);
         } else {
             listfood.add(item);
+            businessId = item.getBusinessId();
         }
         tinyDB.putListObject("CartList", listfood);
         Toast.makeText(context, "Added to your Cart", Toast.LENGTH_SHORT).show();

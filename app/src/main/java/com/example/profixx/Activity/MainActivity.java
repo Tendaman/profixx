@@ -3,6 +3,7 @@ package com.example.profixx.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -38,6 +39,8 @@ public class MainActivity extends BaseActivity {
 
         businessId = "wIa0mvasuYNhgTkpnOGRhI1xklI3";
 
+        Toast.makeText(this, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
+
         initBanner();
         initCategory();
         initPopular();
@@ -63,6 +66,7 @@ public class MainActivity extends BaseActivity {
                     for (DataSnapshot issue : snapshot.getChildren()) {
                         ItemsDomain item = issue.getValue(ItemsDomain.class);
                         if (item != null) {
+                            item.setBusinessId(businessId);
                             item.setItemId(issue.getKey());
                             items.add(item);
                         }

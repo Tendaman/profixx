@@ -3,6 +3,7 @@ package com.example.profixx.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,12 +21,17 @@ public class CartActivity extends BaseActivity {
     ActivityCartBinding binding;
     private double tax;
     private ManagmentCart managerCart;
+    private String businessId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityCartBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        businessId = getIntent().getStringExtra("businessId");
+
+        Toast.makeText(this, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
 
         managerCart = new ManagmentCart(this);
 
@@ -44,7 +50,7 @@ public class CartActivity extends BaseActivity {
         }
 
         binding.cartView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        binding.cartView.setAdapter(new CartAdapter(managerCart.getListCart(), this, () -> calculatorCart()));
+        binding.cartView.setAdapter(new CartAdapter(managerCart.getListCart(), this, this::calculatorCart));
     }
 
     private void setVariable() {

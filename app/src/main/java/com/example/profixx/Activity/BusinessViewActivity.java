@@ -3,6 +3,7 @@ package com.example.profixx.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -33,6 +34,7 @@ public class BusinessViewActivity extends BaseActivity {
         setContentView(binding.getRoot());
 
         businessId = getIntent().getStringExtra("businessId");
+        Toast.makeText(this, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
 
         initViews();
         initCategory();
@@ -89,6 +91,7 @@ public class BusinessViewActivity extends BaseActivity {
                         ItemsDomain item = issue.getValue(ItemsDomain.class);
 
                         if (item != null) {
+                            item.setBusinessId(businessId);  // Set the businessId
                             item.setItemId(issue.getKey());  // Set the itemId
                             items.add(item);
                         }
@@ -120,6 +123,11 @@ public class BusinessViewActivity extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     for (DataSnapshot issue : snapshot.getChildren()) {
+
+                        if (issue.getKey().equals("wIa0mvasuYNhgTkpnOGRhI1xklI3")){
+                            continue;
+                        }
+
                         CategoryDomain category = issue.getValue(CategoryDomain.class);
 
                         // Manually set the ID from the Firebase key if it's not automatically mapped

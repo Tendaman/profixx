@@ -46,6 +46,14 @@ public class DashboardActivity extends BaseActivity {
         initSignout();
         ViewReviewActivity();
         ViewProductActivity();
+        ViewOrdersActivity();
+    }
+
+    private void ViewOrdersActivity() {
+        binding.orders.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, OrdersActivity.class));
+            finish();
+        });
     }
 
     private void ViewReviewActivity() {

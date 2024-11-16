@@ -14,9 +14,17 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.Helper.ManagmentCart;
 import com.example.profixx.R;
 import com.example.profixx.databinding.ActivityCheckoutBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.paypal.checkout.PayPalCheckout;
 import com.paypal.checkout.approve.Approval;
 import com.paypal.checkout.approve.OnApprove;
@@ -51,7 +59,7 @@ import java.util.Map;
 public class CheckoutActivity extends BaseActivity {
     private final String PublishableKey = "pk_test_51PyfvSERQuHKD8YnPpoqR6V67Jn2IsKbVsOokqQFOESCm1fsiAjbj6omPJd1LQjqTaNtP1XIVeUSO35yNaz03a2B0047JcEHrs";
     private final String SecretKey = "sk_test_51PyfvSERQuHKD8Yn0oVZqd1JhRr86N2jYNTlQHH7XF25JL4wI9shWQ2yKGrHZYvLyTy9FgaHL1odBYuhwiBa8DT900rMGixuYU";
-
+    private DatabaseReference databaseReference;
     private String CustomerId;
     private String EphericalKey;
     private String ClientSecret;
@@ -60,12 +68,15 @@ public class CheckoutActivity extends BaseActivity {
     PaymentButtonContainer paymentButtonContainer;
     public static final String TAG = "Checkout Activity";
     private double totalPrice;
+    private double productTotal;
     private ManagmentCart managerCart;
     private final String PayPalClientId = "AVvtG0G1Ai2K1cEGnfYdfYLZHaC_FBTIKZlW8Cit-E_vWvmMWw50NqMH69bigw1TyDZonWp4F_dZjCmO";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         // Configure PayPal
         PayPalCheckout.setConfig(new CheckoutConfig(
@@ -134,6 +145,7 @@ public class CheckoutActivity extends BaseActivity {
                             public void onCaptureComplete(@NonNull CaptureOrderResult result) {
                                 Log.d(TAG, String.format("CaptureOrderResult: %s", result));
                                 Toast.makeText(CheckoutActivity.this, "Successful", Toast.LENGTH_SHORT).show();
+                                saveOrderData();
                                 Intent intent = new Intent(CheckoutActivity.this, InvoiceActivity.class);
                                 startActivity(intent);
                                 finish();
@@ -291,6 +303,7 @@ public class CheckoutActivity extends BaseActivity {
     private void onPaymentResult(PaymentSheetResult paymentSheetResult) {
         if (paymentSheetResult instanceof PaymentSheetResult.Completed) {
             Toast.makeText(this, "Payment Successful", Toast.LENGTH_SHORT).show();
+            saveOrderData();
             Intent intent = new Intent(CheckoutActivity.this, InvoiceActivity.class);
             startActivity(intent);
             finish();
@@ -324,6 +337,86 @@ public class CheckoutActivity extends BaseActivity {
         binding.taxTxt.setText("$" + tax);
         binding.totalTxt.setText("$" + total);
 
+        productTotal = itemTotal;
+
         totalPrice = total;
+    }
+
+    private void saveOrderData() {
+        // Replace with user data retrieval method
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DatabaseReference databasesReference = FirebaseDatabase.getInstance().getReference("users");
+        databasesReference.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()){
+                    String username = snapshot.child("username").getValue(String.class);
+                    String address = snapshot.child("address").getValue(String.class);
+                    String email = snapshot.child("email").getValue(String.class);
+                    String city = snapshot.child("city").getValue(String.class);
+                    String province = snapshot.child("province").getValue(String.class);
+                    String postalCode = snapshot.child("postalCode").getValue(String.class);
+                    String suburb = snapshot.child("suburb").getValue(String.class);
+                    String country = snapshot.child("country").getValue(String.class);
+                    String phoneNumber = snapshot.child("phoneNumber").getValue(String.class);
+                    String photoUrl = snapshot.child("photoUrl").getValue(String.class);
+
+                    uploadData(username, address, email, city, province, postalCode, suburb, country, phoneNumber, photoUrl);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void uploadData(String username, String address, String email, String city, String province, String postalCode, String suburb, String country, String phoneNumber, String photoUrl) {
+        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = user.getUid();
+        myref.child("users").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+
+                    for (ItemsDomain item : managerCart.getListCart()) {
+                        String businessId = item.getBusinessId();
+                        DatabaseReference orderRef = FirebaseDatabase.getInstance().getReference("businesses").child(businessId).child("orders");
+
+                        String orderId = orderRef.push().getKey();
+                        if (orderId != null) {
+                            Map<String, Object> orderData = new HashMap<>();
+                            orderData.put("orderId", orderId);
+                            orderData.put("userId", userId);
+                            orderData.put("userName", username); // Set the fetched username
+                            orderData.put("itemName", item.getTitle());
+                            orderData.put("quantity", item.getNumberInCart());
+                            orderData.put("totalAmount",item.getNumberInCart() * item.getPrice());
+                            orderData.put("status", "pending");
+                            orderData.put("phoneNumber", phoneNumber);
+                            orderData.put("address", address);
+                            orderData.put("email", email);
+                            orderData.put("city", city);
+                            orderData.put("province", province);
+                            orderData.put("postalCode", postalCode);
+                            orderData.put("suburb", suburb);
+                            orderData.put("country", country);
+                            orderData.put("photoUrl", photoUrl);
+                            orderData.put("cartItems", managerCart.getListCart());
+
+                            orderRef.child(orderId).setValue(orderData)
+                                    .addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            Log.d(TAG, "Order data saved successfully!");
+                                        } else {
+                                            Log.e(TAG, "Failed to save order data", task1.getException());
+                                        }
+                                    });
+                        }
+                    }
+            } else {
+                Log.e(TAG, "Failed to fetch username", task.getException());
+            }
+        });
     }
 }
