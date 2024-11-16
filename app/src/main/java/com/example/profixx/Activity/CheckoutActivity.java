@@ -18,6 +18,8 @@ import com.example.profixx.Domain.ItemsDomain;
 import com.example.profixx.Helper.ManagmentCart;
 import com.example.profixx.R;
 import com.example.profixx.databinding.ActivityCheckoutBinding;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -342,9 +344,21 @@ public class CheckoutActivity extends BaseActivity {
         totalPrice = total;
     }
 
+    private String getUserId() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct != null) {
+            return acct.getId();
+        } else if (user != null) {
+            return user.getUid();
+        } else {
+            return null;
+        }
+    }
+
     private void saveOrderData() {
         // Replace with user data retrieval method
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userId = getUserId();
         DatabaseReference databasesReference = FirebaseDatabase.getInstance().getReference("users");
         databasesReference.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -374,8 +388,7 @@ public class CheckoutActivity extends BaseActivity {
 
     private void uploadData(String username, String address, String email, String city, String province, String postalCode, String suburb, String country, String phoneNumber, String photoUrl) {
         DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userId = user.getUid();
+        String userId = getUserId();
         myref.child("users").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
 

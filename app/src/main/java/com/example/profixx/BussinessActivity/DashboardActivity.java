@@ -21,6 +21,7 @@ import com.example.profixx.Users.BusinessLoginActivity;
 import com.example.profixx.databinding.ActivityDashboardBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
@@ -42,11 +43,75 @@ public class DashboardActivity extends BaseActivity {
         setContentView(binding.getRoot());
         initVariables();
         initLoadData();
+        initOrderStatus();
+        calculateTotalRevenue();
         initFab();
         initSignout();
         ViewReviewActivity();
         ViewProductActivity();
         ViewOrdersActivity();
+    }
+
+    private String getSignedUser() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            return user.getUid();
+        }
+        return null;
+    }
+
+    private void calculateTotalRevenue() {
+        myRef.child("businesses").child(Objects.requireNonNull(getSignedUser())).child("orders").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                double totalRevenue = 0.0;
+
+                // Iterate through all orders
+                for (DataSnapshot orderSnapshot : task.getResult().getChildren()) {
+                    // Retrieve the price field
+                    Double price = orderSnapshot.child("totalAmount").getValue(Double.class);
+                    if (price != null) {
+                        totalRevenue += price; // Add to total revenue
+                    }
+                }
+
+                // Update the TextView with the total revenue
+                binding.revenuew.setText(String.format("$%.2f", totalRevenue));
+            } else {
+                Toast.makeText(DashboardActivity.this, "Failed to calculate revenue", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void initOrderStatus() {
+        myRef.child("businesses").child(Objects.requireNonNull(getSignedUser())).child("orders").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                int pendingCount = 0;
+                int successfulCount = 0;
+                int totalCount = 0;
+
+                // Iterate through orders
+                for (DataSnapshot orderSnapshot : task.getResult().getChildren()) {
+                    // Check the status of each order
+                    String status = orderSnapshot.child("status").getValue(String.class);
+                    if (status != null) {
+                        totalCount++; // Increment total orders for every order
+                        if (status.equalsIgnoreCase("Pending")) {
+                            pendingCount++;
+                        } else if (status.equalsIgnoreCase("Successful")) {
+                            successfulCount++;
+                        }
+                    }
+                }
+
+                // Update the TextViews
+                binding.penOrders.setText(String.valueOf(pendingCount));
+                binding.sucOrders.setText(String.valueOf(successfulCount));
+                binding.totOrders.setText(String.valueOf(totalCount));
+            } else {
+                Toast.makeText(DashboardActivity.this, "Failed to load orders", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void ViewOrdersActivity() {
