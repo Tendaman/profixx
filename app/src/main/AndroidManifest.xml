@@ -16,6 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".BussinessActivity.BusinessProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".BussinessActivity.ViewOrderActivity"
             android:exported="false" />
         <activity

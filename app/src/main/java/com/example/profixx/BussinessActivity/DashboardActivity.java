@@ -42,6 +42,7 @@ public class DashboardActivity extends BaseActivity {
         binding = ActivityDashboardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initVariables();
+        bottomNav();
         initLoadData();
         initOrderStatus();
         calculateTotalRevenue();
@@ -50,6 +51,11 @@ public class DashboardActivity extends BaseActivity {
         ViewReviewActivity();
         ViewProductActivity();
         ViewOrdersActivity();
+    }
+
+    private void bottomNav() {
+        binding.profileBtn.setOnClickListener(v -> startActivity(new Intent(DashboardActivity.this, BusinessProfileActivity.class)));
+        binding.homeBtn.setOnClickListener(v -> startActivity(new Intent(DashboardActivity.this, DashboardActivity.class)));
     }
 
     private String getSignedUser() {
