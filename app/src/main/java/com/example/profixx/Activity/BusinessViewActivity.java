@@ -34,7 +34,6 @@ public class BusinessViewActivity extends BaseActivity {
         setContentView(binding.getRoot());
 
         businessId = getIntent().getStringExtra("businessId");
-        Toast.makeText(this, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
 
         initViews();
         initCategory();

@@ -140,30 +140,71 @@ public class DetailActivity extends BaseActivity {
     }
 
     private void addToWishlist(String userId) {
-        // Create wishlist item
-        HashMap<String, Object> wishlistItem = new HashMap<>();
-        wishlistItem.put("picUrl", object.getPicUrl());
-        wishlistItem.put("title", object.getTitle());
-        wishlistItem.put("price", object.getPrice());
-        wishlistItem.put("rating", object.getRating());
-        wishlistItem.put("timestamp", ServerValue.TIMESTAMP);
+        // Reference the product's ratings
+        String businessId = getIntent().getStringExtra("businessId");
+        String itemId = getIntent().getStringExtra("itemId");
 
-        // Generate a unique key for the wishlist item
-        String wishlistItemId = wishlistRef.child(userId).child("wishlist").push().getKey();
+        assert businessId != null;
+        assert itemId != null;
 
-        wishlistRef.child(userId)
-                .child("wishlist")
-                .child(wishlistItemId)
-                .setValue(wishlistItem)
-                .addOnSuccessListener(aVoid -> {
-                    isInWishlist = true;
-                    updateFavoriteIcon();
-                    Toast.makeText(DetailActivity.this, "Added to wishlist", Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(DetailActivity.this, "Failed to add to wishlist", Toast.LENGTH_SHORT).show()
-                );
+        DatabaseReference ratingsRef = FirebaseDatabase.getInstance()
+                .getReference("businesses")
+                .child(businessId)
+                .child("products")
+                .child(itemId)
+                .child("reviews");
+
+        // Fetch the average rating from Firebase
+        ratingsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int totalReviews = (int) snapshot.getChildrenCount();
+                double totalRating = 0;
+
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    Double rating = dataSnapshot.child("rating").getValue(Double.class);
+                    if (rating != null && rating > 0) {
+                        totalRating += rating;
+                    }
+                }
+
+                double averageRating = (totalReviews > 0) ? totalRating / totalReviews : 0;
+                String formattedRating = String.format("%.1f", averageRating); // Format to one decimal place
+
+                // Create wishlist item with the formatted rating
+                HashMap<String, Object> wishlistItem = new HashMap<>();
+                wishlistItem.put("picUrl", object.getPicUrl());
+                wishlistItem.put("title", object.getTitle());
+                wishlistItem.put("price", object.getPrice());
+                wishlistItem.put("rating", Double.parseDouble(formattedRating)); // Save the formatted rating
+                wishlistItem.put("itemId", object.getItemId());
+                wishlistItem.put("businessId", object.getBusinessId());
+
+                // Generate a unique key for the wishlist item
+                String wishlistItemId = wishlistRef.child(userId).child("wishlist").push().getKey();
+
+                wishlistRef.child(userId)
+                        .child("wishlist")
+                        .child(wishlistItemId)
+                        .setValue(wishlistItem)
+                        .addOnSuccessListener(aVoid -> {
+                            isInWishlist = true;
+                            updateFavoriteIcon();
+                            Toast.makeText(DetailActivity.this, "Added to wishlist", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(DetailActivity.this, "Failed to add to wishlist", Toast.LENGTH_SHORT).show();
+                        });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(DetailActivity.this, "Failed to calculate rating", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
+
+
 
     private void removeFromWishlist(String userId) {
         wishlistRef.child(userId)
@@ -239,8 +280,10 @@ public class DetailActivity extends BaseActivity {
         String itemId = getIntent().getStringExtra("itemId");
 
         // Reference to the product's reviews in Firebase
-        assert businessId != null;
-        assert itemId != null;
+        if (businessId == null || itemId == null) {
+            Toast.makeText(this, "Error: Missing business or item details.", Toast.LENGTH_SHORT).show();
+            return; // Stop further execution
+        }
         DatabaseReference ratingsRef = FirebaseDatabase.getInstance()
                 .getReference("businesses")
                 .child(businessId)

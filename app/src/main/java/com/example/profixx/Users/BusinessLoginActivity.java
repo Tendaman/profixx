@@ -1,7 +1,9 @@
 package com.example.profixx.Users;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Toast;
 
@@ -14,6 +16,8 @@ import com.google.firebase.auth.FirebaseUser;
 public class BusinessLoginActivity extends BaseActivity {
     FirebaseAuth mAuth;
     ActivityBusinessLoginBinding binding;
+
+    private ProgressDialog progressDialog;
 
     @Override
     public void onStart(){
@@ -66,6 +70,43 @@ public class BusinessLoginActivity extends BaseActivity {
         binding.btnUser.setOnClickListener(v -> {
             startActivity(new Intent(getApplicationContext(), SigninActivity.class));
             finish();
+        });
+
+        binding.forgotPassword.setOnClickListener(v -> {
+
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Logging in...");
+            progressDialog.setCancelable(false);
+            String email = binding.businessEmail.getText().toString().trim();
+
+            if (email.isEmpty()) {
+                binding.emailLayout.setError("Enter your email first");
+                binding.businessEmail.requestFocus();
+                return;
+            }
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                binding.emailLayout.setError("Please enter a valid email");
+                binding.emailLayout.requestFocus();
+                return;
+            }
+
+            progressDialog.setMessage("Sending reset email...");
+            progressDialog.show();
+
+            mAuth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(task -> {
+                        progressDialog.dismiss();
+                        if (task.isSuccessful()) {
+                            Toast.makeText(BusinessLoginActivity.this,
+                                    "Password reset email sent",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(BusinessLoginActivity.this,
+                                    "Failed to send reset email. Please try again.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
     }
     private boolean validateInputs(String businessEmailTxt, String businessPasswordTxt) {

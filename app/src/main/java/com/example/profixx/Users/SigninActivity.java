@@ -1,9 +1,11 @@
 package com.example.profixx.Users;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -20,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -30,6 +33,8 @@ import java.util.HashMap;
 public class SigninActivity extends BaseActivity {
     TextInputEditText email, password;
     Button login, googleBtn, businessLogin;
+    private TextInputLayout emailLayout;
+    private TextView forgotPassword;
     FirebaseAuth mAuth;
     FirebaseDatabase database;
     DatabaseReference usersRef;
@@ -39,6 +44,8 @@ public class SigninActivity extends BaseActivity {
     GoogleSignInClient gsc;
     GoogleSignInAccount account;
     private static final int RC_SIGN_IN = 1000;
+
+    private ProgressDialog progressDialog;
 
     @Override
     public void onStart() {
@@ -73,6 +80,8 @@ public class SigninActivity extends BaseActivity {
         signup = findViewById(R.id.txtSignup);
         googleBtn = findViewById(R.id.btnGoogle);
         businessLogin = findViewById(R.id.btnBusiness);
+        emailLayout = findViewById(R.id.emailLayout);
+        forgotPassword = findViewById(R.id.forgotPassword);
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -132,6 +141,43 @@ public class SigninActivity extends BaseActivity {
             Intent intent = new Intent(getApplicationContext(), BusinessLoginActivity.class);
             startActivity(intent);
             finish();
+        });
+
+        forgotPassword.setOnClickListener(v -> {
+
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Logging in...");
+            progressDialog.setCancelable(false);
+            String remail = email.getText().toString().trim();
+
+            if (remail.isEmpty()) {
+                emailLayout.setError("Enter your email first");
+                email.requestFocus();
+                return;
+            }
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(remail).matches()) {
+                emailLayout.setError("Please enter a valid email");
+                emailLayout.requestFocus();
+                return;
+            }
+
+            progressDialog.setMessage("Sending reset email...");
+            progressDialog.show();
+
+            mAuth.sendPasswordResetEmail(remail)
+                    .addOnCompleteListener(task -> {
+                        progressDialog.dismiss();
+                        if (task.isSuccessful()) {
+                            Toast.makeText(SigninActivity.this,
+                                    "Password reset email sent",
+                                    Toast.LENGTH_LONG).show();
+                        } else {
+                            Toast.makeText(SigninActivity.this,
+                                    "Failed to send reset email. Please try again.",
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
     }
 

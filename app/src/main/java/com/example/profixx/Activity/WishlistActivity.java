@@ -85,7 +85,9 @@ public class WishlistActivity extends BaseActivity {
                             items.clear();
                             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                                 ItemsDomain item = new ItemsDomain();
-                                item.setItemId(dataSnapshot.getKey());
+                                item.setWishlistId(dataSnapshot.getKey()); // Save wishlistId
+                                item.setItemId(dataSnapshot.child("itemId").getValue(String.class));
+                                item.setBusinessId(dataSnapshot.child("businessId").getValue(String.class));
                                 item.setTitle(dataSnapshot.child("title").getValue(String.class));
                                 item.setPrice(dataSnapshot.child("price").getValue(Double.class));
                                 item.setRating(dataSnapshot.child("rating").getValue(Double.class));

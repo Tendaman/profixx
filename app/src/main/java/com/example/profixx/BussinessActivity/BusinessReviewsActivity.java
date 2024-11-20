@@ -35,8 +35,6 @@ import java.util.List;
 public class BusinessReviewsActivity extends BaseActivity {
 
     ActivityBusinessReviewsBinding binding;
-    private ItemsDomain object;
-    private DatabaseReference wishlistRef;
     private FirebaseAuth mAuth;
     private Handler slideHandle = new Handler();
 

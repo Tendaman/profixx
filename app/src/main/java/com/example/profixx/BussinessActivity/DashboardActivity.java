@@ -61,39 +61,52 @@ public class DashboardActivity extends BaseActivity {
     }
 
     private void calculateTotalRevenue() {
-        myRef.child("businesses").child(Objects.requireNonNull(getSignedUser())).child("orders").get().addOnCompleteListener(task -> {
+        DatabaseReference ordersRef = myRef
+                .child(Objects.requireNonNull(getSignedUser()))
+                .child("orders");
+
+        ordersRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().exists()) {
                 double totalRevenue = 0.0;
 
-                // Iterate through all orders
                 for (DataSnapshot orderSnapshot : task.getResult().getChildren()) {
-                    // Retrieve the price field
-                    Double price = orderSnapshot.child("totalAmount").getValue(Double.class);
-                    if (price != null) {
-                        totalRevenue += price; // Add to total revenue
+                    // Access the 'products' child for each order
+                    DataSnapshot productsSnapshot = orderSnapshot.child("products");
+
+                    if (productsSnapshot.exists()) {
+                        for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                            // Retrieve the totalAmount or calculate from quantity and price
+                            Double totalAmount = productSnapshot.child("totalAmount").getValue(Double.class);
+                            if (totalAmount != null) {
+                                totalRevenue += totalAmount; // Add the totalAmount to the revenue
+                            }
+                        }
                     }
                 }
 
                 // Update the TextView with the total revenue
                 binding.revenuew.setText(String.format("$%.2f", totalRevenue));
             } else {
-                Toast.makeText(DashboardActivity.this, "Failed to calculate revenue", Toast.LENGTH_SHORT).show();
+                binding.revenuew.setText("$0.00"); // Default value if no data exists
             }
         });
     }
 
 
+
     private void initOrderStatus() {
-        myRef.child("businesses").child(Objects.requireNonNull(getSignedUser())).child("orders").get().addOnCompleteListener(task -> {
+        DatabaseReference ordersRef = myRef
+                .child(Objects.requireNonNull(getSignedUser()))
+                .child("orders");
+
+        ordersRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult().exists()) {
                 int pendingCount = 0;
                 int successfulCount = 0;
                 int totalCount = 0;
 
-                // Iterate through orders
                 for (DataSnapshot orderSnapshot : task.getResult().getChildren()) {
-                    // Check the status of each order
-                    String status = orderSnapshot.child("status").getValue(String.class);
+                    String status = orderSnapshot.child("userData").child("status").getValue(String.class);
                     if (status != null) {
                         totalCount++; // Increment total orders for every order
                         if (status.equalsIgnoreCase("Pending")) {
@@ -104,19 +117,22 @@ public class DashboardActivity extends BaseActivity {
                     }
                 }
 
-                // Update the TextViews
+                // Update the TextViews with the respective counts
                 binding.penOrders.setText(String.valueOf(pendingCount));
                 binding.sucOrders.setText(String.valueOf(successfulCount));
                 binding.totOrders.setText(String.valueOf(totalCount));
             } else {
-                Toast.makeText(DashboardActivity.this, "Failed to load orders", Toast.LENGTH_SHORT).show();
+                // Set default values if no data exists
+                binding.penOrders.setText("0");
+                binding.sucOrders.setText("0");
+                binding.totOrders.setText("0");
             }
         });
     }
 
     private void ViewOrdersActivity() {
         binding.orders.setOnClickListener(v -> {
-            startActivity(new Intent(DashboardActivity.this, OrdersActivity.class));
+            startActivity(new Intent(DashboardActivity.this, ViewOrderActivity.class));
             finish();
         });
     }
@@ -145,7 +161,7 @@ public class DashboardActivity extends BaseActivity {
     }
 
     private void loadUserData(String uid, Object o) {
-        myRef.child("businesses").child(uid).get().addOnCompleteListener(task -> {
+        myRef.child(uid).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (task.getResult().exists()) {
                     // Get the business data
@@ -252,7 +268,7 @@ public class DashboardActivity extends BaseActivity {
         mAuth = FirebaseAuth.getInstance();
         user = mAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference();
+        myRef = database.getReference("businesses");
     }
 
     private void initSignout() {

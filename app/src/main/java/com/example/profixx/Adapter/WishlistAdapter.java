@@ -77,6 +77,8 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             // Create intent and pass data
             Intent intent = new Intent(context, DetailActivity.class);
             intent.putExtra("object", itemsDomain);
+            intent.putExtra("businessId", item.getBusinessId());
+            intent.putExtra("itemId", item.getItemId());
             context.startActivity(intent);
         });
     }
@@ -101,13 +103,13 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
         String userId = getCurrentUserId();
         if (userId != null && position >= 0 && position < items.size()) {
             ItemsDomain itemToRemove = items.get(position);
-            String itemId = itemToRemove.getItemId(); // Assuming you have getId() method in WishlistDomain
+            String wishlistId = itemToRemove.getWishlistId(); // Assuming you have getId() method in WishlistDomain
 
             // Reference to the specific item in user's wishlist using the unique ID
             DatabaseReference itemRef = wishlistRef
                     .child(userId)
                     .child("wishlist")
-                    .child(itemId); // Using the Firebase-generated unique ID
+                    .child(wishlistId); // Using the Firebase-generated unique ID
 
             // First remove from local list to prevent race conditions
             items.remove(position);
@@ -116,7 +118,7 @@ public class WishlistAdapter extends RecyclerView.Adapter<WishlistAdapter.ViewHo
             // Remove from Firebase
             itemRef.removeValue()
                     .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(context, "Item removed from wishlist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Item removed from wishlist" + wishlistId, Toast.LENGTH_SHORT).show();
                     })
                     .addOnFailureListener(e -> {
                         // If Firebase deletion fails, add the item back to the list

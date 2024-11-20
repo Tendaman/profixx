@@ -56,7 +56,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class CheckoutActivity extends BaseActivity {
     private final String PublishableKey = "pk_test_51PyfvSERQuHKD8YnPpoqR6V67Jn2IsKbVsOokqQFOESCm1fsiAjbj6omPJd1LQjqTaNtP1XIVeUSO35yNaz03a2B0047JcEHrs";
@@ -372,10 +374,10 @@ public class CheckoutActivity extends BaseActivity {
                     String postalCode = snapshot.child("postalCode").getValue(String.class);
                     String suburb = snapshot.child("suburb").getValue(String.class);
                     String country = snapshot.child("country").getValue(String.class);
-                    String phoneNumber = snapshot.child("phoneNumber").getValue(String.class);
+                    String phone = snapshot.child("phone").getValue(String.class);
                     String photoUrl = snapshot.child("photoUrl").getValue(String.class);
 
-                    uploadData(username, address, email, city, province, postalCode, suburb, country, phoneNumber, photoUrl);
+                    uploadData(username, address, email, city, province, postalCode, suburb, country, phone, photoUrl);
                 }
             }
 
@@ -386,50 +388,79 @@ public class CheckoutActivity extends BaseActivity {
         });
     }
 
-    private void uploadData(String username, String address, String email, String city, String province, String postalCode, String suburb, String country, String phoneNumber, String photoUrl) {
-        DatabaseReference myref = FirebaseDatabase.getInstance().getReference();
+    private void uploadData(String username, String address, String email, String city, String province, String postalCode, String suburb, String country, String phone, String photoUrl) {
+        DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
         String userId = getUserId();
-        myref.child("users").get().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
 
-                    for (ItemsDomain item : managerCart.getListCart()) {
-                        String businessId = item.getBusinessId();
-                        DatabaseReference orderRef = FirebaseDatabase.getInstance().getReference("businesses").child(businessId).child("orders");
-
-                        String orderId = orderRef.push().getKey();
-                        if (orderId != null) {
-                            Map<String, Object> orderData = new HashMap<>();
-                            orderData.put("orderId", orderId);
-                            orderData.put("userId", userId);
-                            orderData.put("userName", username); // Set the fetched username
-                            orderData.put("itemName", item.getTitle());
-                            orderData.put("quantity", item.getNumberInCart());
-                            orderData.put("totalAmount",item.getNumberInCart() * item.getPrice());
-                            orderData.put("status", "pending");
-                            orderData.put("phoneNumber", phoneNumber);
-                            orderData.put("address", address);
-                            orderData.put("email", email);
-                            orderData.put("city", city);
-                            orderData.put("province", province);
-                            orderData.put("postalCode", postalCode);
-                            orderData.put("suburb", suburb);
-                            orderData.put("country", country);
-                            orderData.put("photoUrl", photoUrl);
-                            orderData.put("cartItems", managerCart.getListCart());
-
-                            orderRef.child(orderId).setValue(orderData)
-                                    .addOnCompleteListener(task1 -> {
-                                        if (task1.isSuccessful()) {
-                                            Log.d(TAG, "Order data saved successfully!");
-                                        } else {
-                                            Log.e(TAG, "Failed to save order data", task1.getException());
-                                        }
-                                    });
-                        }
-                    }
-            } else {
-                Log.e(TAG, "Failed to fetch username", task.getException());
+        // Step 1: Group items by businessId
+        Map<String, ArrayList<ItemsDomain>> groupedItems = new HashMap<>();
+        for (ItemsDomain item : managerCart.getListCart()) {
+            String businessId = item.getBusinessId();
+            if (!groupedItems.containsKey(businessId)) {
+                groupedItems.put(businessId, new ArrayList<>());
             }
-        });
+            Objects.requireNonNull(groupedItems.get(businessId)).add(item);
+        }
+
+        // Step 2: Iterate over each business and process the orders
+        for (Map.Entry<String, ArrayList<ItemsDomain>> entry : groupedItems.entrySet()) {
+            String businessId = entry.getKey();
+            ArrayList<ItemsDomain> itemsForBusiness = entry.getValue();
+
+            // Generate a unique orderId for the business
+            DatabaseReference ordersRef = rootRef.child("businesses").child(businessId).child("orders");
+            String orderId = ordersRef.push().getKey();
+            if (orderId == null) {
+                Log.e(TAG, "Failed to generate orderId for business: " + businessId);
+                continue;
+            }
+
+            // Reference for the current order
+            DatabaseReference orderRef = ordersRef.child(orderId);
+
+            // Save user data under the `userData` node
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("userId", userId);
+            userData.put("userName", username);
+            userData.put("phone", phone);
+            userData.put("address", address);
+            userData.put("email", email);
+            userData.put("city", city);
+            userData.put("province", province);
+            userData.put("postalCode", postalCode);
+            userData.put("suburb", suburb);
+            userData.put("country", country);
+            userData.put("photoUrl", photoUrl);
+            userData.put("status", "pending");
+
+            orderRef.child("userData").setValue(userData)
+                    .addOnCompleteListener(userDataTask -> {
+                        if (userDataTask.isSuccessful()) {
+                            Log.d(TAG, "User data saved successfully for business: " + businessId);
+
+                            // Step 3: Save products under the `products` node
+                            for (ItemsDomain item : itemsForBusiness) {
+                                String productId = item.getItemId(); // Use product ID from the business
+                                Map<String, Object> productData = new HashMap<>();
+                                productData.put("quantity", item.getNumberInCart());
+                                productData.put("totalAmount", item.getNumberInCart() * item.getPrice());
+                                productData.put("title", item.getTitle());
+                                productData.put("price", item.getPrice());
+                                productData.put("picUrl", item.getPicUrl()); // Product image URL
+
+                                orderRef.child("products").child(productId).setValue(productData)
+                                        .addOnCompleteListener(productTask -> {
+                                            if (productTask.isSuccessful()) {
+                                                Log.d(TAG, "Product data saved successfully for business: " + businessId);
+                                            } else {
+                                                Log.e(TAG, "Failed to save product data for business: " + businessId, productTask.getException());
+                                            }
+                                        });
+                            }
+                        } else {
+                            Log.e(TAG, "Failed to save user data for business: " + businessId, userDataTask.getException());
+                        }
+                    });
+        }
     }
 }

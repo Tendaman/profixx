@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 public class ItemsDomain implements Serializable {
+    private String wishlistId;
     private String title;
     private String description;
     private ArrayList<String> picUrl;
@@ -18,7 +19,8 @@ public class ItemsDomain implements Serializable {
     public ItemsDomain() {
     }
 
-    public ItemsDomain(String title, String description, ArrayList<String> picUrl, double price, Double oldPrice, int review, double rating, String itemId, String businessId) {
+    public ItemsDomain(String wishlistId, String title, String description, ArrayList<String> picUrl, double price, Double oldPrice, int review, double rating, String itemId, String businessId) {
+        this.wishlistId = wishlistId;
         this.title = title;
         this.description = description;
         this.picUrl = picUrl;
@@ -28,6 +30,14 @@ public class ItemsDomain implements Serializable {
         this.rating = rating;
         this.itemId = itemId;
         this.businessId = businessId;
+    }
+
+    public String getWishlistId() {
+        return wishlistId;
+    }
+
+    public void setWishlistId(String wishlistId) {
+        this.wishlistId = wishlistId;
     }
 
     public String getTitle() {
