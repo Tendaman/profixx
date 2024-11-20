@@ -95,6 +95,8 @@ public class CheckoutActivity extends BaseActivity {
                 "com.example.profixx://paypalpay"
         ));
 
+        Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
+
         binding = ActivityCheckoutBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -179,7 +181,6 @@ public class CheckoutActivity extends BaseActivity {
                         try {
                             JSONObject object = new JSONObject(response);
                             CustomerId = object.getString("id");
-                            Toast.makeText(CheckoutActivity.this, "Customer ID: " + CustomerId, Toast.LENGTH_SHORT).show();
                             getEmphericalKey();
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
@@ -211,7 +212,6 @@ public class CheckoutActivity extends BaseActivity {
                         try {
                             JSONObject object = new JSONObject(response);
                             EphericalKey = object.getString("id");
-                            Toast.makeText(CheckoutActivity.this, "Ephemeral Key: " + EphericalKey, Toast.LENGTH_SHORT).show();
                             getClientSecret(CustomerId, EphericalKey);
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
@@ -252,7 +252,6 @@ public class CheckoutActivity extends BaseActivity {
                         try {
                             JSONObject jsonObject = new JSONObject(response);
                             ClientSecret = jsonObject.getString("client_secret");
-                            Toast.makeText(CheckoutActivity.this, "Client Secret: " + ClientSecret, Toast.LENGTH_SHORT).show();
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }

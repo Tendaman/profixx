@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
@@ -11,9 +12,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.profixx.BussinessActivity.AllOrdersActivity;
 import com.example.profixx.BussinessActivity.OrdersActivity;
+import com.example.profixx.BussinessActivity.ViewOrderingActivity;
 import com.example.profixx.Domain.OrdersDomain;
-import com.example.profixx.databinding.ViewholderOrdersBinding;
+import com.example.profixx.databinding.ActivityFinishedOrdersBinding;
+import com.example.profixx.databinding.ViewholderFinishedOrdersBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -23,25 +27,25 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.ViewHolder> {
+public class FinishedOrderAdapter extends RecyclerView.Adapter<FinishedOrderAdapter.ViewHolder> {
     private final ArrayList<OrdersDomain> orders;
     Context context;
 
-    public UserOrdersAdapter(ArrayList<OrdersDomain> orders) {
+    public FinishedOrderAdapter(ArrayList<OrdersDomain> orders) {
         this.orders = orders;
     }
 
     @NonNull
     @Override
-    public UserOrdersAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public FinishedOrderAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
-        ViewholderOrdersBinding binding = ViewholderOrdersBinding.inflate(
+        ViewholderFinishedOrdersBinding binding = ViewholderFinishedOrdersBinding.inflate(
                 LayoutInflater.from(context), parent, false);
         return new ViewHolder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UserOrdersAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull FinishedOrderAdapter.ViewHolder holder, int position) {
         holder.binding.username.setText(orders.get(position).getUserName());
         holder.binding.userEmail.setText(orders.get(position).getEmail());
         holder.binding.userId.setText(orders.get(position).getUserId());
@@ -64,7 +68,7 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Vi
 
             Toast.makeText(context, "OrderId: " + orderId, Toast.LENGTH_SHORT).show();
             Toast.makeText(context, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(context, OrdersActivity.class);
+            Intent intent = new Intent(context, ViewOrderingActivity.class);
             intent.putExtra("orderId", order.getOrderId());
             intent.putExtra("businessId", order.getBusinessId());
             context.startActivity(intent);
@@ -113,16 +117,14 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Vi
 
     }
 
-
     @Override
     public int getItemCount() {
         return orders.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ViewholderOrdersBinding binding;
-
-        public ViewHolder(@NonNull ViewholderOrdersBinding binding) {
+        ViewholderFinishedOrdersBinding binding;
+        public ViewHolder(@NonNull ViewholderFinishedOrdersBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
         }

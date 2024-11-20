@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -51,6 +52,7 @@ public class DashboardActivity extends BaseActivity {
         ViewReviewActivity();
         ViewProductActivity();
         ViewOrdersActivity();
+        ViewFinishedOrdersActivity();
     }
 
     private void bottomNav() {
@@ -143,6 +145,13 @@ public class DashboardActivity extends BaseActivity {
         });
     }
 
+    private void ViewFinishedOrdersActivity() {
+        binding.sold.setOnClickListener(v -> {
+            startActivity(new Intent(DashboardActivity.this, FinishedOrdersActivity.class));
+            finish();
+        });
+    }
+
     private void ViewReviewActivity() {
         binding.reviews.setOnClickListener(v -> {
             startActivity(new Intent(DashboardActivity.this, BusinessReviewsActivity.class));
@@ -162,11 +171,11 @@ public class DashboardActivity extends BaseActivity {
         if (user == null) {
             redirectToSignIn();
         } else {
-            loadUserData(user.getUid(), null);
+            loadUserData(user.getUid());
         }
     }
 
-    private void loadUserData(String uid, Object o) {
+    private void loadUserData(String uid) {
         myRef.child(uid).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 if (task.getResult().exists()) {
@@ -217,12 +226,25 @@ public class DashboardActivity extends BaseActivity {
             });
 
             viewTrans.setOnClickListener(v1 -> {
-                Toast.makeText(DashboardActivity.this, "View Transactions Selected", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getApplicationContext(), AllOrdersActivity.class));
                 dialog.dismiss();
             });
 
             promoteStore.setOnClickListener(v1 -> {
-                Toast.makeText(DashboardActivity.this, "Promote Store Selected", Toast.LENGTH_SHORT).show();
+                // URL for Google Analytics
+                String analyticsUrl = "https://analytics.google.com/analytics/web/";
+
+                // Check if the Google Analytics app is installed
+                Intent intent = getPackageManager().getLaunchIntentForPackage("com.google.android.apps.gsa.analytics");
+
+                if (intent != null) {
+                    // If the app is installed, open the app
+                    startActivity(intent);
+                } else {
+                    // If the app is not installed, open the Analytics website in the browser
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(analyticsUrl));
+                    startActivity(browserIntent);
+                }
                 dialog.dismiss();
             });
 

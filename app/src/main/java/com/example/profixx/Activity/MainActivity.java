@@ -39,8 +39,6 @@ public class MainActivity extends BaseActivity {
 
         businessId = "wIa0mvasuYNhgTkpnOGRhI1xklI3";
 
-        Toast.makeText(this, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
-
         initBanner();
         initCategory();
         initPopular();

@@ -16,6 +16,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".BussinessActivity.ViewOrderingActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BussinessActivity.AllOrdersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".BussinessActivity.FinishedOrdersActivity"
+            android:exported="false" />
+        <activity
             android:name=".BussinessActivity.BusinessProfileActivity"
             android:exported="false" />
         <activity

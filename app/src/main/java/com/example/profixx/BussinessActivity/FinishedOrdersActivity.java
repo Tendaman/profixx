@@ -5,13 +5,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.profixx.Activity.BaseActivity;
+import com.example.profixx.Adapter.FinishedOrderAdapter;
 import com.example.profixx.Adapter.UserOrdersAdapter;
 import com.example.profixx.Domain.OrdersDomain;
-import com.example.profixx.databinding.ActivityViewOrderBinding;
+import com.example.profixx.R;
+import com.example.profixx.databinding.ActivityFinishedOrdersBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -22,14 +29,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class ViewOrderActivity extends BaseActivity {
+public class FinishedOrdersActivity extends BaseActivity {
 
-    ActivityViewOrderBinding binding;
+    ActivityFinishedOrdersBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityViewOrderBinding.inflate(getLayoutInflater());
+        binding = ActivityFinishedOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         initViews();
         backBtn();
@@ -90,7 +97,7 @@ public class ViewOrderActivity extends BaseActivity {
                             order.setCountry(userDataSnapshot.child("country").getValue(String.class));
                             order.setStatus(userDataSnapshot.child("status").getValue(String.class));
                             String status = userDataSnapshot.child("status").getValue(String.class);
-                            if ("pending".equals(status)) {
+                            if ("successful".equals(status)) {
                                 // If status is pending, fetch the products and add to the list
                                 DataSnapshot productsSnapshot = orderSnapshot.child("products");
                                 if (productsSnapshot.exists()) {
@@ -107,12 +114,12 @@ public class ViewOrderActivity extends BaseActivity {
 
                     // Set up RecyclerView with data
                     if (!ordersList.isEmpty()) {
-                        binding.recyclerViewOrders.setLayoutManager(new LinearLayoutManager(
-                                ViewOrderActivity.this,
+                        binding.recyclerViewFinished.setLayoutManager(new LinearLayoutManager(
+                                FinishedOrdersActivity.this,
                                 LinearLayoutManager.VERTICAL,
                                 false
                         ));
-                        binding.recyclerViewOrders.setAdapter(new UserOrdersAdapter(ordersList));
+                        binding.recyclerViewFinished.setAdapter(new FinishedOrderAdapter(ordersList));
                     } else {
                         binding.noOrderText.setVisibility(View.VISIBLE); // Show "No Orders" message
                     }
@@ -129,5 +136,4 @@ public class ViewOrderActivity extends BaseActivity {
             }
         });
     }
-
 }

@@ -31,8 +31,6 @@ public class CartActivity extends BaseActivity {
 
         businessId = getIntent().getStringExtra("businessId");
 
-        Toast.makeText(this, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
-
         managerCart = new ManagmentCart(this);
 
         calculatorCart();
