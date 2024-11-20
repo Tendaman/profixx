@@ -2,8 +2,9 @@ package com.example.profixx.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -14,6 +15,7 @@ import androidx.viewpager2.widget.MarginPageTransformer;
 
 import com.example.profixx.Adapter.CategoryAdapter;
 import com.example.profixx.Adapter.PopularAdapter;
+import com.example.profixx.Adapter.ProductAdapter;
 import com.example.profixx.Adapter.SliderAdapter;
 import com.example.profixx.Domain.CategoryDomain;
 import com.example.profixx.Domain.ItemsDomain;
@@ -25,11 +27,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class MainActivity extends BaseActivity {
     private ActivityMainBinding binding;
-
     String businessId;
+    private ArrayList<ItemsDomain> allProducts = new ArrayList<>();
+    private ProductAdapter searchAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +46,95 @@ public class MainActivity extends BaseActivity {
         initBanner();
         initCategory();
         initPopular();
+        setupSearch();
         bottomNavigation();
     }
+
+    private void setupSearch() {
+        // Initialize search RecyclerView
+        binding.procuctRecycler.setLayoutManager(new LinearLayoutManager(this));
+        searchAdapter = new ProductAdapter(new ArrayList<>(), businessId);
+        binding.procuctRecycler.setAdapter(searchAdapter);
+
+        // Add TextWatcher to search EditText
+        binding.editTextText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                String searchText = s.toString().toLowerCase().trim();
+
+                if (searchText.isEmpty()) {
+                    // Hide dialog when search is empty
+                    binding.procuctRecycler.setVisibility(View.GONE);
+                } else {
+                    // Show dialog and filter products
+                    filterProducts(searchText);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
+        // Fetch all products for searching
+        fetchAllProducts();
+    }
+
+    private void fetchAllProducts() {
+        DatabaseReference myRef = database.getReference("businesses");
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                allProducts.clear();
+                if (snapshot.exists()) {
+                    for (DataSnapshot businessSnapshot : snapshot.getChildren()) {
+                        String businessId = businessSnapshot.getKey();
+
+                        // Skip if businessId is null or empty
+                        if (businessId == null || businessId.isEmpty()) {
+                            continue;
+                        }
+
+                        // Get products for each business
+                        DataSnapshot productsSnapshot = businessSnapshot.child("products");
+                        for (DataSnapshot productSnapshot : productsSnapshot.getChildren()) {
+                            ItemsDomain item = productSnapshot.getValue(ItemsDomain.class);
+                            if (item != null) {
+                                item.setBusinessId(businessId);
+                                item.setItemId(productSnapshot.getKey());
+                                allProducts.add(item);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {}
+        });
+    }
+
+    private void filterProducts(String searchText) {
+        // Filter products based on search text
+        ArrayList<ItemsDomain> filteredProducts = allProducts.stream()
+                .filter(item -> item.getTitle().toLowerCase().contains(searchText))
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if (!filteredProducts.isEmpty()) {
+            // Update search adapter with filtered products
+            searchAdapter = new ProductAdapter(filteredProducts, businessId);
+            binding.procuctRecycler.setAdapter(searchAdapter);
+
+            // Show dialog
+            binding.procuctRecycler.setVisibility(View.VISIBLE);
+        } else {
+            // Hide dialog if no products match
+            binding.procuctRecycler.setVisibility(View.GONE);
+        }
+    }
+
 
     private void bottomNavigation() {
         binding.cartBtn.setOnClickListener(v -> startActivity(new Intent(MainActivity.this,CartActivity.class)));
@@ -55,6 +146,7 @@ public class MainActivity extends BaseActivity {
     private void initPopular() {
         DatabaseReference myRef = database.getReference("businesses").child(businessId).child("products");
         binding.progressBarPopular.setVisibility(View.VISIBLE);
+
         ArrayList<ItemsDomain> items = new ArrayList<>();
 
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
