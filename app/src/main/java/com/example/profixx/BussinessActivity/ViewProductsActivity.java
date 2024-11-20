@@ -28,7 +28,7 @@ public class ViewProductsActivity extends BaseActivity {
     private ProductListAdapter adapter;
     private ArrayList<ItemsDomain> items;
     private FirebaseAuth mAuth;
-    private FirebaseUser user;
+
     private String uid;
     private DatabaseReference productsRef;
 
