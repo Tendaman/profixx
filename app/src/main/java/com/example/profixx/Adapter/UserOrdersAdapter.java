@@ -61,9 +61,6 @@ public class UserOrdersAdapter extends RecyclerView.Adapter<UserOrdersAdapter.Vi
         String businessId = FirebaseAuth.getInstance().getUid();
 
         holder.binding.orderLayout.setOnClickListener(v -> {
-
-            Toast.makeText(context, "OrderId: " + orderId, Toast.LENGTH_SHORT).show();
-            Toast.makeText(context, "BusinessId: " + businessId, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(context, OrdersActivity.class);
             intent.putExtra("orderId", order.getOrderId());
             intent.putExtra("businessId", order.getBusinessId());

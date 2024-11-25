@@ -43,7 +43,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         holder.binding.feeEachItem.setText("$" + listItemsSelected.get(position).getPrice());
         holder.binding.totalEachItem.setText("$" + Math.round((listItemsSelected.get(position).getNumberInCart() * listItemsSelected.get(position).getPrice())));
         holder.binding.numberItemTxt.setText(String.valueOf(listItemsSelected.get(position).getNumberInCart()));
-        holder.binding.businessIdText.setText(listItemsSelected.get(position).getBusinessId());
+
 
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transform(new CenterCrop());

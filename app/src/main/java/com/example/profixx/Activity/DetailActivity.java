@@ -265,8 +265,6 @@ public class DetailActivity extends BaseActivity {
         binding.titleTxt.setText(object.getTitle());
         binding.priceTxt.setText("$" + object.getPrice());
 
-        Toast.makeText(this, "businessID:" + object.getBusinessId(), Toast.LENGTH_SHORT).show();
-
         binding.addTocartBtn.setOnClickListener(v -> {
             object.setNumberInCart(numberOrder);
             object.setBusinessId(object.getBusinessId());

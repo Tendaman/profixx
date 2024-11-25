@@ -41,7 +41,7 @@ public class MainActivity extends BaseActivity {
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        businessId = "wIa0mvasuYNhgTkpnOGRhI1xklI3";
+        businessId = "uWHIULsf3QVu98ev2BTsLyCjGNQ2";
 
         initBanner();
         initCategory();
@@ -166,7 +166,7 @@ public class MainActivity extends BaseActivity {
                                 MainActivity.this,
                                 2
                                 ));
-                        binding.recyclerViewPopular.setAdapter(new PopularAdapter(items, "wIa0mvasuYNhgTkpnOGRhI1xklI3"));
+                        binding.recyclerViewPopular.setAdapter(new PopularAdapter(items, "uWHIULsf3QVu98ev2BTsLyCjGNQ2"));
                     }
                     binding.progressBarPopular.setVisibility(View.GONE);
                 }
@@ -189,7 +189,7 @@ public class MainActivity extends BaseActivity {
                 if (snapshot.exists()) {
                     for (DataSnapshot businessSnapshot : snapshot.getChildren()) {
                         // Skip only the specified business ID
-                        if (businessSnapshot.getKey().equals("wIa0mvasuYNhgTkpnOGRhI1xklI3")) {
+                        if (businessSnapshot.getKey().equals("uWHIULsf3QVu98ev2BTsLyCjGNQ2")) {
                             continue; // Ignore this business and move to the next one
                         }
 

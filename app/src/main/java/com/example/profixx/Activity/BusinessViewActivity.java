@@ -123,7 +123,7 @@ public class BusinessViewActivity extends BaseActivity {
                 if (snapshot.exists()) {
                     for (DataSnapshot issue : snapshot.getChildren()) {
 
-                        if (issue.getKey().equals("wIa0mvasuYNhgTkpnOGRhI1xklI3")){
+                        if (issue.getKey().equals("uWHIULsf3QVu98ev2BTsLyCjGNQ2")){
                             continue;
                         }
 
